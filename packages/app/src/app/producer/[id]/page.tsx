@@ -66,8 +66,8 @@ export default function ProducerPage() {
   // Show loading state
   if (loading) {
     return (
-      <div style={{ textAlign: 'center', padding: '4rem 2rem', color: '#6b7280' }}>
-        <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🎵</div>
+      <div className="text-center py-16 px-8 text-gray-500">
+        <div className="text-7xl mb-4">🎵</div>
         <p>Loading producer data...</p>
       </div>
     )
@@ -76,23 +76,15 @@ export default function ProducerPage() {
   // Show not found state if no producer data
   if (!producer) {
     return (
-      <div style={{ textAlign: 'center', padding: '4rem 2rem', color: '#6b7280' }}>
-        <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🎵</div>
-        <h3 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '0.5rem', color: '#1f2937' }}>
+      <div className="text-center py-16 px-8 text-gray-500">
+        <div className="text-7xl mb-4">🎵</div>
+        <h3 className="text-2xl font-semibold text-gray-800 mb-2">
           Producer not found
         </h3>
         <p>The producer you're looking for doesn't exist or has been removed.</p>
         <a 
           href="/producers"
-          style={{
-            display: 'inline-block',
-            marginTop: '1rem',
-            padding: '0.5rem 1rem',
-            background: '#3b82f6',
-            color: 'white',
-            borderRadius: '0.375rem',
-            textDecoration: 'none'
-          }}
+          className="inline-block mt-4 px-4 py-2 bg-blue-500 text-white rounded no-underline"
         >
           Browse All Producers
         </a>
@@ -103,40 +95,35 @@ export default function ProducerPage() {
   return (
     <div>
       {/* Hero Section */}
-      <div style={{
-        height: '400px',
-        background: producer.coverImageUrl 
-          ? `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url(${producer.coverImageUrl})`
-          : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        display: 'flex',
-        alignItems: 'end',
-        padding: '2rem',
-        color: 'white'
-      }}>
+      <div 
+        className="h-[400px] bg-cover bg-center flex items-end p-8 text-white"
+        style={{
+          backgroundImage: producer.coverImageUrl 
+            ? `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url(${producer.coverImageUrl})`
+            : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+        }}
+      >
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-            <div style={{
-              width: '80px', height: '80px', borderRadius: '50%',
-              background: producer.profileImageUrl 
-                ? `url(${producer.profileImageUrl})` 
-                : 'rgba(255,255,255,0.2)',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              display: 'flex',
-              alignItems: 'center', justifyContent: 'center', fontSize: '2rem'
-            }}>
+          <div className="flex items-center gap-4 mb-4">
+            <div 
+              className="w-20 h-20 rounded-full flex items-center justify-center text-2xl bg-cover bg-center"
+              style={{
+                backgroundImage: producer.profileImageUrl 
+                  ? `url(${producer.profileImageUrl})` 
+                  : 'none',
+                backgroundColor: !producer.profileImageUrl ? 'rgba(255,255,255,0.2)' : 'transparent'
+              }}
+            >
               {!producer.profileImageUrl && '🎵'}
             </div>
             <div>
-              <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold', margin: 0 }}>
+              <h1 className="text-4xl font-bold m-0">
                 {producer.name} {producer.verified ? ' ✓' : ''}
               </h1>
-              <p style={{ fontSize: '1.125rem', opacity: 0.9, margin: 0 }}>
+              <p className="text-lg opacity-90 m-0">
                 {producer.location || 'Unknown'} • {beats?.length || 0} beats • {producer.totalSales || 0} sales
               </p>
-              <p style={{ fontSize: '0.875rem', opacity: 0.8, margin: '0.5rem 0 0 0' }}>
+              <p className="text-sm opacity-80 mt-2 mb-0">
                 {producer.genres && producer.genres.length > 0 ? producer.genres.join(', ') : 'Various Genres'}
               </p>
             </div>
@@ -144,37 +131,30 @@ export default function ProducerPage() {
         </div>
       </div>
 
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
+      <div className="max-w-7xl mx-auto p-8">
         {/* Bio & Social Sharing */}
-        <div style={{
-          background: 'white', padding: '2rem', borderRadius: '0.5rem',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)', marginBottom: '2rem', border: '1px solid #e5e7eb'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#1f2937' }}>About</h2>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div className="bg-white p-8 rounded-lg shadow-sm mb-8 border border-gray-200">
+          <div className="flex justify-between items-start mb-4">
+            <h2 className="text-2xl font-semibold text-gray-800">About</h2>
+            <div className="flex gap-2">
               <SocialShare size="sm" title={`Check out ${producer.name} on BeatsChain`} />
             </div>
           </div>
-          <p style={{ color: '#6b7280', lineHeight: '1.6' }}>
+          <p className="text-gray-600 leading-relaxed">
             {producer.bio || 'Beat creator on BeatsChain platform.'}
           </p>
         </div>
 
         {/* Genre Filters */}
-        <div style={{
-          background: 'white', padding: '1.5rem', borderRadius: '0.5rem',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)', marginBottom: '2rem', border: '1px solid #e5e7eb'
-        }}>
-          <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '1rem', color: '#1f2937' }}>Filter by Genre</h3>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+        <div className="bg-white p-6 rounded-lg shadow-sm mb-8 border border-gray-200">
+          <h3 className="text-lg font-semibold mb-4 text-gray-800">Filter by Genre</h3>
+          <div className="flex flex-wrap gap-2">
             {genres.map(genre => (
-              <button key={genre} onClick={() => setSelectedGenre(genre)} style={{
-                padding: '0.5rem 1rem', borderRadius: '1rem', border: 'none',
-                background: selectedGenre === genre ? '#3b82f6' : '#f3f4f6',
-                color: selectedGenre === genre ? 'white' : '#6b7280',
-                cursor: 'pointer', fontSize: '0.875rem', fontWeight: '500', textTransform: 'capitalize'
-              }}>
+              <button 
+                key={genre} 
+                onClick={() => setSelectedGenre(genre)} 
+                className={`px-4 py-2 rounded-full border-none cursor-pointer text-sm font-medium capitalize ${selectedGenre === genre ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-500'}`}
+              >
                 {genre.replace('-', ' ')}
               </button>
             ))}
@@ -183,103 +163,69 @@ export default function ProducerPage() {
 
         {/* Beats Collection */}
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#1f2937' }}>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-semibold text-gray-800">
               Beats Collection ({filteredBeats?.length || 0})
             </h2>
           </div>
           
           {!filteredBeats || filteredBeats.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '4rem 2rem', color: '#6b7280' }}>
-              <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🎵</div>
-              <h3 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '0.5rem', color: '#1f2937' }}>No beats uploaded yet</h3>
+            <div className="text-center py-16 px-8 text-gray-500">
+              <div className="text-7xl mb-4">🎵</div>
+              <h3 className="text-2xl font-semibold text-gray-800 mb-2">No beats uploaded yet</h3>
               <p>This beat creator hasn't uploaded any beats to the platform yet.</p>
             </div>
           ) : (
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-              gap: '1.5rem'
-            }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredBeats.map((beat) => (
-                <div key={beat.id} style={{
-                  background: 'white',
-                  borderRadius: '0.5rem',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                  border: '1px solid #e5e7eb',
-                  overflow: 'hidden'
-                }}>
-                  <div style={{
-                    height: '200px',
-                    background: beat.coverImageUrl ? `url(${beat.coverImageUrl})` : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white',
-                    fontSize: '3rem'
-                  }}>
+                <div key={beat.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                  <div 
+                    className="h-48 flex items-center justify-center text-white text-5xl bg-cover bg-center"
+                    style={{
+                      backgroundImage: beat.coverImageUrl 
+                        ? `url(${beat.coverImageUrl})` 
+                        : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                    }}
+                  >
                     {!beat.coverImageUrl && '🎵'}
                   </div>
-                  <div style={{ padding: '1.5rem' }}>
-                    <h3 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '0.5rem', color: '#1f2937' }}>
+                  <div className="p-6">
+                    <h3 className="text-xl font-semibold mb-2 text-gray-800">
                       {beat.title}
                     </h3>
-                    <p style={{ color: '#6b7280', fontSize: '0.875rem', marginBottom: '0.5rem' }}>
-                      {beat.producerName && <span style={{ fontWeight: '500' }}>by {beat.producerName}</span>}
+                    <p className="text-gray-500 text-sm mb-2">
+                      {beat.producerName && <span className="font-medium">by {beat.producerName}</span>}
                     </p>
-                    <p style={{ color: '#6b7280', fontSize: '0.875rem', marginBottom: '1rem' }}>
+                    <p className="text-gray-500 text-sm mb-4">
                       {beat.genre} • {beat.bpm} BPM • {beat.key}
                     </p>
-                    <div style={{ marginBottom: '1rem' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                    <div className="mb-4">
+                      <div className="flex justify-between items-center mb-4">
                         <div>
-                          <div style={{ fontSize: '1.1rem', fontWeight: '600', color: '#059669' }}>
+                          <div className="text-lg font-semibold text-green-600">
                             {beat.price.toFixed(3)} ETH
                           </div>
-                          <div style={{ fontSize: '0.8rem', color: '#6b7280' }}>
+                          <div className="text-xs text-gray-500">
                             ~R{Math.round(beat.price * 18000).toLocaleString()}
                           </div>
                         </div>
                         <a 
                           href={`/beatnfts?beat=${beat.id}`}
-                          style={{
-                            background: '#059669',
-                            color: 'white',
-                            padding: '0.5rem 1rem',
-                            border: 'none',
-                            borderRadius: '0.375rem',
-                            cursor: 'pointer',
-                            fontSize: '0.875rem',
-                            fontWeight: '500',
-                            textDecoration: 'none',
-                            display: 'inline-block',
-                            textAlign: 'center'
-                          }}
+                          className="bg-green-600 text-white px-4 py-2 rounded text-sm font-medium inline-block text-center no-underline"
                         >
                           Buy Now
                         </a>
                       </div>
                       
-                      {/* Audio Player */}
+                      {/* Simple Audio Player */}
                       {beat.audioUrl && (
-                        <div style={{ marginTop: '1rem' }}>
-                          <AudioPlayer
-                            beat={{
-                              id: beat.id,
-                              title: beat.title,
-                              genre: beat.genre,
-                              bpm: beat.bpm,
-                              key: beat.key,
-                              audioUrl: beat.audioUrl,
-                              coverImageUrl: beat.coverImageUrl,
-                              producerName: beat.producerName,
-                              price: beat.price,
-                              isNFT: beat.isNFT || false
-                            }}
-                            previewMode={true}
-                            showWaveform={false}
+                        <div className="mt-4 p-3 bg-gray-100 rounded">
+                          <div className="mb-2 text-xs text-gray-500">Preview (30s)</div>
+                          <audio
+                            controls
+                            src={beat.audioUrl}
+                            className="w-full"
+                            preload="metadata"
                           />
                         </div>
                       )}
