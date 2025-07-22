@@ -1,14 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Beat } from '@/types'
+import { Beat } from '@/types/data'
 import SanityBeatCard from '@/components/SanityBeatCard'
-import { ApiClient } from '@/lib/api'
 import { useDebounce } from '@/hooks/useDebounce'
-import { toast } from 'react-toastify'
 import { Pagination } from '@/components/Pagination'
-import { client, urlFor } from '@/lib/sanity'
+import { client } from '@/lib/sanity-client'
 import CmsHeroSection from '@/components/HeroSection'
+import { dataProvider } from '@/adapters/unifiedDataProvider'
 
 export default function MarketplacePage() {
   const [searchTerm, setSearchTerm] = useState('')
@@ -24,41 +23,43 @@ export default function MarketplacePage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Load beats and hero data
   useEffect(() => {
-    // Load hero data from Sanity
-    async function fetchHeroData() {
-      if (!client) return
-      try {
-        const data = await client.fetch(`*[_type == "page" && slug.current == "beatnfts"][0].heroSection`)
-        if (data) setHeroData(data)
-      } catch (error) {
-        console.error('Error loading hero data:', error)
-      }
-    }
-    fetchHeroData()
-    
-    const fetchBeats = async () => {
+    async function loadData() {
       try {
         setLoading(true)
         setError(null)
         
-        // Fetch real beats from API
-        const fetchedBeats = await ApiClient.getBeats({ limit: 100 })
-        setBeats(fetchedBeats)
+        // Get featured beats from unified provider
+        try {
+          const fetchedBeats = await dataProvider.getFeaturedBeats(12)
+          setBeats(fetchedBeats)
+        } catch (beatsError) {
+          console.error('Error fetching beats:', beatsError)
+          setBeats([])
+        }
         
-      } catch (err: any) {
-        console.error('Failed to load beats:', err)
-        setBeats([])
+        // Load hero data from Sanity
+        if (client) {
+          try {
+            const data = await client.fetch(`*[_type == "page" && slug.current == "beatnfts"][0].heroSection`)
+            if (data) setHeroData(data)
+          } catch (heroError) {
+            console.warn('Failed to fetch hero data from Sanity:', heroError)
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load data:', err)
         setError('Failed to load beats')
       } finally {
         setLoading(false)
       }
     }
 
-    fetchBeats()
+    loadData()
   }, [])
   
-  // Reset to page 1 when filters change - MUST be at top level
+  // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1)
   }, [debouncedSearchTerm, selectedGenre, sortBy])
@@ -74,8 +75,6 @@ export default function MarketplacePage() {
       </div>
     )
   }
-  
-
 
   const filteredBeats = beats.filter(beat => {
     const matchesSearch = beat.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
@@ -169,10 +168,10 @@ export default function MarketplacePage() {
       {/* Results Count */}
       <div className="mb-6 flex justify-between items-center">
         <p className="text-gray-600">
-          Showing {startIndex + 1}-{Math.min(startIndex + beatsPerPage, filteredBeats.length)} of {filteredBeats.length} BeatNFT{filteredBeats.length !== 1 ? 's' : ''}
+          Showing {filteredBeats.length > 0 ? `${startIndex + 1}-${Math.min(startIndex + beatsPerPage, filteredBeats.length)} of ` : ''}{filteredBeats.length} BeatNFT{filteredBeats.length !== 1 ? 's' : ''}
         </p>
         <p className="text-sm text-gray-500">
-          Page {currentPage} of {totalPages}
+          {totalPages > 0 ? `Page ${currentPage} of ${totalPages}` : ''}
         </p>
       </div>
 
@@ -183,12 +182,14 @@ export default function MarketplacePage() {
         ))}
       </div>
 
-      <Pagination
-        currentPage={currentPage}
-        totalItems={filteredBeats.length}
-        itemsPerPage={beatsPerPage}
-        onPageChange={setCurrentPage}
-      />
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          totalItems={filteredBeats.length}
+          itemsPerPage={beatsPerPage}
+          onPageChange={setCurrentPage}
+        />
+      )}
 
       {currentBeats.length === 0 && (
         <div className="text-center py-16">

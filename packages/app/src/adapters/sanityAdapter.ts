@@ -9,6 +9,11 @@ import { Beat, Producer, DataAdapter } from '@/types/data';
 export class SanityAdapter implements DataAdapter {
   async getProducer(id: string): Promise<Producer | null> {
     try {
+      if (!id) {
+        console.warn('Empty producer ID provided');
+        return null;
+      }
+      
       const producer = await client.fetch(`
         *[_type == "producer" && slug.current == $id][0] {
           _id, name, bio, location, genres, profileImage, coverImage, 
@@ -23,7 +28,7 @@ export class SanityAdapter implements DataAdapter {
         name: producer.name || 'Beat Creator',
         bio: producer.bio || '',
         location: producer.location || 'South Africa',
-        genres: producer.genres || ['Hip Hop'],
+        genres: Array.isArray(producer.genres) ? producer.genres : ['Hip Hop'],
         totalBeats: producer.stats?.totalBeats || 0,
         totalSales: producer.stats?.totalSales || 0,
         verified: producer.verified || false,
@@ -39,12 +44,20 @@ export class SanityAdapter implements DataAdapter {
 
   async getProducerBeats(producerId: string): Promise<Beat[]> {
     try {
+      if (!producerId) {
+        console.warn('Empty producer ID provided');
+        return [];
+      }
+      
       const beats = await client.fetch(`
         *[_type == "beat" && producer->slug.current == $producerId] {
           _id, title, slug, description, producer->{name, slug},
           stageName, genre, bpm, key, price, audioFile, coverImage
         }
       `, { producerId });
+      
+      // Ensure we have an array even if the query returns null
+      if (!beats) return [];
       
       return beats.map((b: any) => ({
         id: b.slug?.current || b._id,
@@ -75,6 +88,9 @@ export class SanityAdapter implements DataAdapter {
         }
       `);
       
+      // Ensure we have an array even if the query returns null
+      if (!producers) return [];
+      
       return producers.map((p: any) => ({
         id: p.slug?.current || p._id,
         name: p.name || 'Beat Creator',
@@ -96,6 +112,11 @@ export class SanityAdapter implements DataAdapter {
 
   async getBeat(id: string): Promise<Beat | null> {
     try {
+      if (!id) {
+        console.warn('Empty beat ID provided');
+        return null;
+      }
+      
       const beat = await client.fetch(`
         *[_type == "beat" && slug.current == $id][0] {
           _id, title, slug, description, producer->{name, slug},
@@ -127,12 +148,26 @@ export class SanityAdapter implements DataAdapter {
 
   async getFeaturedBeats(limit: number = 6): Promise<Beat[]> {
     try {
-      const beats = await client.fetch(`
+      // First try to get featured beats
+      let beats = await client.fetch(`
         *[_type == "beat" && featured == true][0..${limit-1}] {
           _id, title, slug, description, producer->{name, slug},
           stageName, genre, bpm, key, price, audioFile, coverImage
         }
       `);
+      
+      // If no featured beats, get any beats up to the limit
+      if (!beats || beats.length === 0) {
+        beats = await client.fetch(`
+          *[_type == "beat"][0..${limit-1}] {
+            _id, title, slug, description, producer->{name, slug},
+            stageName, genre, bpm, key, price, audioFile, coverImage
+          }
+        `);
+      }
+      
+      // Ensure we have an array even if the query returns null
+      if (!beats) beats = [];
       
       return beats.map((b: any) => ({
         id: b.slug?.current || b._id,
