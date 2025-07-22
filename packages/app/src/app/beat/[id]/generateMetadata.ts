@@ -3,22 +3,33 @@ import { generateSocialMetadata } from '@/lib/socialShare'
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   try {
-    // Try to fetch beat data
-    const { TestDataManager } = await import('@/utils/testData')
-    const beats = TestDataManager.getTestBeats()
-    const beat = beats.find(b => b.id === params.id)
+    // Try to fetch beat data from Web3 or local storage
+    let beat = null
     
+    // Check if we're in a browser environment
+    if (typeof window !== 'undefined') {
+      // Try to get from localStorage first (for development/testing)
+      const storedBeats = localStorage.getItem('beats_data')
+      if (storedBeats) {
+        const beats = JSON.parse(storedBeats)
+        beat = beats.find(b => b.id === params.id)
+      }
+    }
+    
+    // If no beat found, create a fallback
     if (!beat) {
-      return {
-        title: 'Beat Not Found',
-        description: 'The requested beat could not be found.'
+      beat = {
+        id: params.id,
+        title: `Beat #${params.id}`,
+        description: 'Web3 beat on BeatsChain',
+        coverImageUrl: null
       }
     }
     
     // Generate metadata with proper social sharing
     return generateSocialMetadata({
-      title: `${beat.title} - ${beat.genre} Beat by ${beat.producerName}`,
-      description: beat.description || `Listen to this ${beat.genre} beat on BeatsChain`,
+      title: beat.title,
+      description: beat.description || `Check out this beat on BeatsChain`,
       imageUrl: beat.coverImageUrl,
       type: 'music',
       path: `/beat/${params.id}`
@@ -28,8 +39,8 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
     
     // Fallback metadata
     return {
-      title: 'BeatsChain Beat',
-      description: 'Listen to this beat on BeatsChain - Web3 Beat Marketplace'
+      title: `Beat #${params.id} | BeatsChain`,
+      description: 'Web3 beat on BeatsChain - Blockchain Beat Marketplace'
     }
   }
 }

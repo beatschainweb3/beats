@@ -5,9 +5,12 @@ import { Beat } from '@/types'
 import PurchaseModal from './purchase/PurchaseModal'
 import LicenseNegotiationModal from './LicenseNegotiationModal'
 import PriceDisplay from './PriceDisplay'
+import OptimizedImage from './OptimizedImage'
+import AudioWaveform from './AudioWaveform'
 import { useUnifiedAuth } from '@/context/UnifiedAuthContext'
 import { useContentCreator } from '@/hooks/useContentCreator'
 import { useCreatorPreview } from '@/hooks/useCreatorPreview'
+import { normalizeImageSource } from '@/utils/imageOptimization'
 import { toast } from 'react-toastify'
 
 interface BeatCardProps {
@@ -82,15 +85,13 @@ export default function BeatCard({ beat }: BeatCardProps) {
     }
   }
 
-  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleProgressClick = (newTime: number) => {
     const audio = audioRef.current
-    const progressBar = progressRef.current
-    if (!audio || !progressBar || !duration) return
-
-    const rect = progressBar.getBoundingClientRect()
-    const clickX = e.clientX - rect.left
-    const newTime = (clickX / rect.width) * duration
-    audio.currentTime = newTime
+    if (!audio) return
+    
+    // Ensure time is within valid range
+    const clampedTime = Math.max(0, Math.min(newTime, duration))
+    audio.currentTime = clampedTime
   }
 
   const handlePurchase = () => {
@@ -138,7 +139,13 @@ export default function BeatCard({ beat }: BeatCardProps) {
           color: 'white', fontSize: '1.125rem', fontWeight: '600'
         }}>
           {beat.coverImageUrl ? (
-            <img src={beat.coverImageUrl} alt={beat.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <OptimizedImage 
+              src={normalizeImageSource(beat.coverImageUrl)} 
+              alt={beat.title} 
+              fill 
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              className="w-full h-full object-cover"
+            />
           ) : (
             <span>🎵 {beat.title}</span>
           )}
@@ -182,8 +189,15 @@ export default function BeatCard({ beat }: BeatCardProps) {
                   <div style={{ width: '16px', height: '16px', border: '2px solid white', borderTop: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
                 ) : isPlaying ? '⏸' : '▶'}
               </button>
-              <div style={{ flex: 1, height: '6px', background: '#d1d5db', borderRadius: '3px', cursor: 'pointer' }} onClick={handleProgressClick} ref={progressRef}>
-                <div style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%`, height: '100%', background: '#3b82f6', borderRadius: '3px' }}></div>
+              <div style={{ flex: 1, height: '40px', cursor: 'pointer' }}>
+                <AudioWaveform
+                  audioUrl={beat.audioUrl || 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav'}
+                  currentTime={currentTime}
+                  duration={duration}
+                  previewDuration={!canPreviewFullBeat ? previewDuration : -1}
+                  onSeek={handleProgressClick}
+                  className="w-full h-full"
+                />
               </div>
               <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>
                 {formatTime(currentTime)} / {canPreviewFullBeat ? formatTime(duration) : `${previewDuration}s`}

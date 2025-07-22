@@ -34,6 +34,7 @@ function getFallbackPost(slug: string) {
 export default function BlogPostPage({ params }: PageProps) {
   const [post, setPost] = useState(getFallbackPost(params.slug))
   const [loading, setLoading] = useState(true)
+  const [heroImageUrl, setHeroImageUrl] = useState('')
 
   useEffect(() => {
     async function fetchPost() {
@@ -45,12 +46,28 @@ export default function BlogPostPage({ params }: PageProps) {
         const data = await client.fetch(`*[_type == "post" && slug.current == $slug][0] {
           _id, title, slug, publishedAt, mainImage, body, categories[]->{ title }, author->{ name, bio, image }
         }`, { slug: params.slug })
-        if (data) setPost(data)
-      } catch {}
+        
+        if (data) {
+          setPost(data)
+          
+          // Process hero image if available
+          if (data.mainImage?.asset) {
+            try {
+              const imageUrl = urlFor(data.mainImage).width(1920).url()
+              setHeroImageUrl(imageUrl)
+            } catch (error) {
+              console.warn('Failed to process hero image:', error)
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch blog post:', error)
+      }
       setLoading(false)
     }
     fetchPost()
   }, [params.slug])
+  
   const shareUrl = `https://beatschain.app/blog/${post.slug.current}`
   const shareTitle = encodeURIComponent(post.title)
   const shareDescription = encodeURIComponent(post.excerpt || post.body?.[0]?.children?.[0]?.text?.substring(0, 160) || 'Read this article on BeatsChain')
@@ -64,7 +81,11 @@ export default function BlogPostPage({ params }: PageProps) {
     <div>
       {/* Hero Section */}
       <div style={{
-        background: 'linear-gradient(135deg, #1f2937 0%, #374151 100%)',
+        background: heroImageUrl 
+          ? `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.7)), url(${heroImageUrl})`
+          : 'linear-gradient(135deg, #1f2937 0%, #374151 100%)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
         minHeight: '40vh',
         display: 'flex',
         alignItems: 'center',

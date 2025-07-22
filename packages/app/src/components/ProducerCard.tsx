@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { useCardStyles } from '@/hooks/useCardStyles'
+import OptimizedImage from './OptimizedImage'
+import { normalizeImageSource } from '@/utils/imageOptimization'
 
 interface Producer {
   id: string
@@ -44,17 +46,33 @@ export default function ProducerCard({ producer }: ProducerCardProps) {
           width: producerCardStyle.profileImageSize,
           height: producerCardStyle.profileImageSize,
           borderRadius: '50%',
-          background: producer.profileImage 
-            ? `url(${producer.profileImage})` 
-            : producerCardStyle.defaultCoverGradient,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          overflow: 'hidden',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: '1.5rem'
+          fontSize: '1.5rem',
+          position: 'relative'
         }}>
-          {!producer.profileImage && producer.name.charAt(0)}
+          {producer.profileImage ? (
+            <OptimizedImage 
+              src={normalizeImageSource(producer.profileImage)} 
+              alt={`${producer.name}'s profile`}
+              fill
+              sizes="96px"
+              className="object-cover"
+            />
+          ) : (
+            <div style={{
+              width: '100%',
+              height: '100%',
+              background: producerCardStyle.defaultCoverGradient,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              {producer.name.charAt(0)}
+            </div>
+          )}
         </div>
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>

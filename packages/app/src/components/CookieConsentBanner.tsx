@@ -1,20 +1,22 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { getStorageItem, setStorageItem } from '@/utils/storage'
 
 export default function CookieConsentBanner() {
   const [showBanner, setShowBanner] = useState(false)
 
   useEffect(() => {
     // Check if user has already consented
-    const hasConsented = localStorage.getItem('cookie-consent')
+    const hasConsented = getStorageItem<string>('cookie-consent')
     if (!hasConsented) {
       setShowBanner(true)
     }
   }, [])
 
   const handleAccept = () => {
-    localStorage.setItem('cookie-consent', 'accepted')
+    // Store consent for 180 days (6 months)
+    setStorageItem('cookie-consent', 'accepted', 180)
     setShowBanner(false)
     
     // Enable Google Analytics if not already enabled
@@ -26,7 +28,8 @@ export default function CookieConsentBanner() {
   }
 
   const handleDecline = () => {
-    localStorage.setItem('cookie-consent', 'declined')
+    // Store consent for 180 days (6 months)
+    setStorageItem('cookie-consent', 'declined', 180)
     setShowBanner(false)
     
     // Disable Google Analytics

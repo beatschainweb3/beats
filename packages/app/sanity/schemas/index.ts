@@ -6,6 +6,7 @@ import { category } from './category'
 import { author } from './author'
 import { siteSettings } from './siteSettings'
 import { heroSection } from './heroSection'
+import { blogHero } from './blogHero'
 import { contentBlock } from './contentBlock'
 import { paginatedList, interactiveForm, mediaGallery, dynamicTable } from './advancedContentBlocks'
 import { web3Stats } from './web3ContentBlocks'
@@ -41,6 +42,7 @@ export const schemaTypes = [
   
   // Dynamic content
   heroSection,
+  blogHero,
   contentBlock,
   
   // Advanced content blocks

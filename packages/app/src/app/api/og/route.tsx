@@ -1,6 +1,5 @@
 import { ImageResponse } from 'next/og'
 import { NextRequest } from 'next/server'
-import { SITE_NAME } from '@/utils/site'
 
 export const runtime = 'edge'
 
@@ -8,64 +7,99 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
     
-    // Get dynamic parameters from the request
+    // Get title from query params or use default
     const title = searchParams.get('title') || 'BeatsChain'
-    const description = searchParams.get('description') || 'Web3 Beat Marketplace'
+    const subtitle = searchParams.get('subtitle') || 'Web3 Beat Marketplace'
     const type = searchParams.get('type') || 'default'
     
-    // Font
-    const interFont = await fetch(
-      new URL('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap', req.url)
-    ).then((res) => res.arrayBuffer())
+    // Choose background color based on content type
+    let bgGradient = 'linear-gradient(to bottom right, #667eea, #764ba2)'
     
-    // Generate the image based on type
+    if (type === 'beat') {
+      bgGradient = 'linear-gradient(to bottom right, #3b82f6, #2dd4bf)'
+    } else if (type === 'producer') {
+      bgGradient = 'linear-gradient(to bottom right, #8b5cf6, #ec4899)'
+    } else if (type === 'blog') {
+      bgGradient = 'linear-gradient(to bottom right, #f43f5e, #f97316)'
+    }
+    
     return new ImageResponse(
       (
         <div
-          tw="flex flex-col items-center justify-center w-full h-full text-white relative"
           style={{
-            background: type === 'beat' 
-              ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-              : type === 'blog' 
-                ? 'linear-gradient(135deg, #1f2937 0%, #374151 50%, #4b5563 100%)'
-                : 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
-          }}>
-          
-          {/* Background Pattern */}
-          <div tw="absolute inset-0 opacity-10">
-            <div tw="flex flex-wrap gap-8 p-8">
-              <div tw="text-6xl">🎵</div>
-              <div tw="text-6xl">🎧</div>
-              <div tw="text-6xl">🎤</div>
-              <div tw="text-6xl">🎹</div>
-              <div tw="text-6xl">🥁</div>
-              <div tw="text-6xl">🎸</div>
+            height: '100%',
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: bgGradient,
+            fontSize: 60,
+            fontWeight: 800,
+            color: 'white',
+            padding: '0 120px',
+            textAlign: 'center',
+            textShadow: '0 2px 10px rgba(0,0,0,0.3)',
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              top: 30,
+              left: 30,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+            }}
+          >
+            <div
+              style={{
+                fontSize: 30,
+                fontWeight: 900,
+                background: 'white',
+                color: '#764ba2',
+                padding: '8px 16px',
+                borderRadius: '8px',
+              }}
+            >
+              BeatsChain
             </div>
           </div>
           
-          {/* Main Content */}
-          <div tw="flex flex-col items-center justify-center z-10 max-w-5xl text-center px-10">
-            <h1 tw="text-6xl font-bold mb-6">{title}</h1>
-            <h2 tw="text-3xl mb-8">{description}</h2>
-            
-            {/* Key Features */}
-            <div tw="flex flex-col items-center justify-center">
-              <div tw="flex items-center gap-8 mb-4">
-                <div tw="flex items-center gap-2 bg-white bg-opacity-20 px-4 py-2 rounded-full">
-                  <span tw="text-2xl">🎫</span>
-                  <span tw="text-xl font-semibold">BeatNFT Credits</span>
-                </div>
-                <div tw="flex items-center gap-2 bg-white bg-opacity-20 px-4 py-2 rounded-full">
-                  <span tw="text-2xl">⛓️</span>
-                  <span tw="text-xl font-semibold">NFT Beat Ownership</span>
-                </div>
-              </div>
+          <div style={{ maxWidth: '900px' }}>
+            {title}
+          </div>
+          
+          {subtitle && (
+            <div
+              style={{
+                fontSize: 30,
+                fontWeight: 400,
+                opacity: 0.9,
+                marginTop: 20,
+              }}
+            >
+              {subtitle}
             </div>
-            
-            {/* Bottom Text */}
-            <div tw="mt-8 text-center">
-              <div tw="text-2xl font-medium">{SITE_NAME}</div>
-              <div tw="text-xl mt-2 opacity-90">Web3 Beat Marketplace</div>
+          )}
+          
+          <div
+            style={{
+              position: 'absolute',
+              bottom: 30,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
+            }}
+          >
+            <div
+              style={{
+                fontSize: 24,
+                opacity: 0.8,
+              }}
+            >
+              beatschain.app
             </div>
           </div>
         </div>
@@ -73,14 +107,6 @@ export async function GET(req: NextRequest) {
       {
         width: 1200,
         height: 630,
-        fonts: [
-          {
-            name: 'Inter',
-            data: interFont,
-            style: 'normal',
-            weight: 400,
-          },
-        ],
       }
     )
   } catch (error) {

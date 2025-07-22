@@ -1,84 +1,140 @@
 import { ImageResponse } from 'next/og'
-import { getPageBySlug } from '@/lib/sanity-client'
-import fallbackContent from '@/utils/fallbackContent'
- 
+import { NextRequest } from 'next/server'
+import { client } from '@/lib/sanity-client'
+
 export const runtime = 'edge'
- 
-export async function GET(
-  request: Request,
-  { params }: { params: { slug: string } }
-) {
+
+export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
   try {
     const slug = params.slug
     
-    // Try to get page data from Sanity
-    const pageData = await getPageBySlug(slug)
+    // Try to fetch post data from Sanity
+    let post = null
+    let imageUrl = null
     
-    // Use fallback if Sanity data isn't available
-    const title = pageData?.title || 
-                 fallbackContent[slug]?.title || 
-                 'BeatsChain'
+    if (client) {
+      try {
+        post = await client.fetch(`
+          *[_type == "post" && slug.current == $slug][0] {
+            title,
+            excerpt,
+            mainImage,
+            author->{ name }
+          }
+        `, { slug })
+        
+        // Get image URL if available
+        if (post?.mainImage?.asset?._ref) {
+          // Convert Sanity image reference to URL
+          // This is a simplified version - in production you'd use urlFor
+          const ref = post.mainImage.asset._ref
+          const [_file, id, extension] = ref.split('-')
+          imageUrl = `https://cdn.sanity.io/images/${process.env.NEXT_PUBLIC_SANITY_PROJECT_ID}/${process.env.NEXT_PUBLIC_SANITY_DATASET}/${id}.${extension}`
+        }
+      } catch (error) {
+        console.warn('Failed to fetch post from Sanity:', error)
+      }
+    }
     
-    const description = pageData?.seo?.metaDescription || 
-                       'Web3 beat marketplace connecting SA producers with global artists'
+    // If no post found, use fallback data
+    const title = post?.title || `Blog Post: ${slug}`
+    const subtitle = post?.excerpt || 'Read on BeatsChain'
+    const author = post?.author?.name || 'BeatsChain Team'
     
+    // Create image response
     return new ImageResponse(
       (
         <div
           style={{
-            display: 'flex',
             height: '100%',
             width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            flexDirection: 'column',
-            backgroundImage: 'linear-gradient(to bottom right, #4F46E5, #7C3AED)',
+            background: imageUrl 
+              ? `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.8)), url(${imageUrl})` 
+              : 'linear-gradient(to bottom right, #f43f5e, #f97316)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
             fontSize: 60,
-            letterSpacing: -2,
-            fontWeight: 700,
+            fontWeight: 800,
+            color: 'white',
+            padding: '0 120px',
             textAlign: 'center',
+            textShadow: '0 2px 10px rgba(0,0,0,0.5)',
           }}
         >
           <div
             style={{
-              backgroundImage: 'linear-gradient(90deg, rgb(255, 255, 255), rgb(168, 85, 247))',
-              backgroundClip: 'text',
-              '-webkit-background-clip': 'text',
-              color: 'transparent',
-              padding: '20px 40px',
+              position: 'absolute',
+              top: 30,
+              left: 30,
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
+              gap: '10px',
             }}
           >
-            <svg width="80" height="80" viewBox="0 0 24 24" fill="white">
-              <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
-            </svg>
-            <div style={{ marginLeft: '20px' }}>BeatsChain</div>
+            <div
+              style={{
+                fontSize: 30,
+                fontWeight: 900,
+                background: 'white',
+                color: '#f43f5e',
+                padding: '8px 16px',
+                borderRadius: '8px',
+              }}
+            >
+              BeatsChain Blog
+            </div>
           </div>
-          <div
-            style={{
-              fontSize: 30,
-              background: 'white',
-              color: 'black',
-              borderRadius: '10px',
-              padding: '10px 20px',
-              marginTop: '20px',
-              maxWidth: '80%',
-            }}
-          >
+          
+          <div style={{ maxWidth: '900px' }}>
             {title}
           </div>
+          
+          {subtitle && (
+            <div
+              style={{
+                fontSize: 30,
+                fontWeight: 400,
+                opacity: 0.9,
+                marginTop: 20,
+                maxWidth: '800px',
+              }}
+            >
+              {subtitle.length > 100 ? subtitle.substring(0, 100) + '...' : subtitle}
+            </div>
+          )}
+          
           <div
             style={{
-              fontSize: 20,
-              color: 'white',
-              marginTop: '10px',
-              maxWidth: '70%',
-              opacity: 0.8,
+              position: 'absolute',
+              bottom: 30,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              width: 'calc(100% - 60px)',
+              padding: '0 30px',
             }}
           >
-            {description}
+            <div
+              style={{
+                fontSize: 24,
+                opacity: 0.8,
+              }}
+            >
+              By {author}
+            </div>
+            
+            <div
+              style={{
+                fontSize: 24,
+                opacity: 0.8,
+              }}
+            >
+              beatschain.app/blog
+            </div>
           </div>
         </div>
       ),
@@ -87,10 +143,8 @@ export async function GET(
         height: 630,
       }
     )
-  } catch (e) {
-    console.error(`Error generating OG image: ${e.message}`)
-    return new Response(`Failed to generate image`, {
-      status: 500,
-    })
+  } catch (error) {
+    console.error('Error generating blog OG image:', error)
+    return new Response('Failed to generate image', { status: 500 })
   }
 }

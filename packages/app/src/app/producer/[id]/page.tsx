@@ -3,40 +3,120 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { client, urlFor } from '@/lib/sanity'
-import { useReadContract } from 'wagmi'
-import { beatNFTABI } from '@/abis'
 import AudioPlayer from '@/components/audio/AudioPlayer'
 import SocialShare from '@/components/SocialShare'
+import { ErrorBoundary } from 'react-error-boundary'
+
+// Import Web3 components conditionally to prevent client-side exceptions
+const Web3ProducerData = ({ producer, onBeatsLoaded }) => {
+  const [beats, setBeats] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
+  
+  useEffect(() => {
+    // Only attempt to load beats if we have a valid wallet address
+    if (!producer?.walletAddress || !producer.walletAddress.startsWith('0x')) {
+      return
+    }
+    
+    const loadBeats = async () => {
+      setIsLoading(true)
+      try {
+        // Dynamically import Web3 dependencies to prevent initialization errors
+        const { readContract } = await import('wagmi/actions')
+        const { config } = await import('@/lib/wagmi')
+        const { beatNFTABI } = await import('@/abis')
+        
+        // Get producer's NFT balance
+        const balance = await readContract(config, {
+          address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
+          abi: beatNFTABI,
+          functionName: 'balanceOf',
+          args: [producer.walletAddress]
+        }).catch(() => BigInt(0))
+        
+        // For now, create mock data since we need to iterate through tokens
+        const tokenIds = Array.from({ length: Number(balance || 0) }, (_, i) => BigInt(i + 1))
+        
+        // Fetch metadata for each token
+        const beatPromises = tokenIds.map(async (tokenId) => {
+          try {
+            const tokenURI = await readContract(config, {
+              address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
+              abi: beatNFTABI,
+              functionName: 'tokenURI',
+              args: [tokenId]
+            })
+            
+            // Fetch IPFS metadata
+            const ipfsUrl = tokenURI.replace('ipfs://', process.env.NEXT_PUBLIC_IPFS_GATEWAY || 'https://gateway.pinata.cloud/ipfs/')
+            const response = await fetch(ipfsUrl)
+            const metadata = await response.json()
+            
+            return {
+              id: tokenId.toString(),
+              title: metadata.name || 'Untitled Beat',
+              genre: metadata.attributes?.find((attr) => attr.trait_type === 'Genre')?.value || 'Unknown',
+              bpm: metadata.attributes?.find((attr) => attr.trait_type === 'BPM')?.value || 120,
+              key: metadata.attributes?.find((attr) => attr.trait_type === 'Key')?.value || 'C',
+              price: parseFloat(metadata.attributes?.find((attr) => attr.trait_type === 'Price')?.value || '0'),
+              coverImageUrl: metadata.image?.replace('ipfs://', process.env.NEXT_PUBLIC_IPFS_GATEWAY || 'https://gateway.pinata.cloud/ipfs/'),
+              audioUrl: metadata.animation_url?.replace('ipfs://', process.env.NEXT_PUBLIC_IPFS_GATEWAY || 'https://gateway.pinata.cloud/ipfs/'),
+              stageName: producer.name
+            }
+          } catch (error) {
+            console.warn('Failed to fetch metadata for token:', tokenId, error)
+            return null
+          }
+        })
+        
+        const loadedBeats = (await Promise.all(beatPromises)).filter(Boolean)
+        setBeats(loadedBeats)
+        onBeatsLoaded(loadedBeats)
+      } catch (error) {
+        console.warn('Could not load producer beats from Web3:', error)
+        setBeats([])
+        onBeatsLoaded([])
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    
+    loadBeats()
+  }, [producer?.walletAddress, producer?.name, onBeatsLoaded])
+  
+  return null // This component only handles data fetching, not rendering
+}
+
+// Fallback component for error boundary
+const ErrorFallback = () => (
+  <div style={{ 
+    padding: '2rem', 
+    margin: '1rem 0', 
+    backgroundColor: '#FEF2F2', 
+    borderRadius: '0.5rem',
+    color: '#B91C1C',
+    textAlign: 'center'
+  }}>
+    <h3 style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>
+      Something went wrong loading Web3 data
+    </h3>
+    <p>We're still able to show basic producer information.</p>
+  </div>
+)
 
 export default function ProducerPage() {
   const params = useParams()
   const producerId = params.id as string
   const [selectedGenre, setSelectedGenre] = useState('all')
-  const [producer, setProducer] = useState<any>(null)
-  const [beats, setBeats] = useState<any[]>([])
+  const [producer, setProducer] = useState(null)
+  const [beats, setBeats] = useState([])
   const [loading, setLoading] = useState(true)
-  const [currentlyPlaying, setCurrentlyPlaying] = useState<string | null>(null)
+  const [web3Enabled, setWeb3Enabled] = useState(false)
   
-  // Get producer's wallet address for Web3 data
-  const producerAddress = producer?.walletAddress || '0x0000000000000000000000000000000000000000'
-  
-  // Fetch producer's beat count from contract
-  const { data: beatCount } = useReadContract({
-    address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
-    abi: beatNFTABI,
-    functionName: 'balanceOf',
-    args: [producerAddress],
-    query: { enabled: !!producerAddress && producerAddress !== '0x0000000000000000000000000000000000000000' }
-  })
-  
-  // Fetch producer's total sales from contract events (using balanceOf for now)
-  const { data: totalSales } = useReadContract({
-    address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
-    abi: beatNFTABI,
-    functionName: 'balanceOf',
-    args: [producerAddress],
-    query: { enabled: !!producerAddress && producerAddress !== '0x0000000000000000000000000000000000000000' }
-  })
+  // Handle beats loaded from Web3 component
+  const handleBeatsLoaded = (loadedBeats) => {
+    setBeats(loadedBeats)
+  }
   
   useEffect(() => {
     let isMounted = true
@@ -50,7 +130,7 @@ export default function ProducerPage() {
       
       try {
         // Try Sanity first
-        const sanityProducer = await client.fetch(`
+        const sanityProducer = await client?.fetch(`
           *[_type == "producer" && slug.current == $slug][0] {
             name,
             slug,
@@ -64,52 +144,61 @@ export default function ProducerPage() {
             walletAddress,
             stats
           }
-        `, { slug: producerId })
+        `, { slug: producerId }).catch(() => null)
         
         if (sanityProducer && isMounted) {
-          setProducer({
+          const producerData = {
             id: producerId,
             name: sanityProducer.name || 'Beat Creator',
             displayName: sanityProducer.name || 'Beat Creator',
             bio: sanityProducer.bio || 'Beat creator on BeatsChain platform.',
             location: sanityProducer.location || 'South Africa',
             genres: sanityProducer.genres || ['Hip Hop'],
-            totalBeats: Number(beatCount) || sanityProducer.stats?.totalBeats || 0,
-            totalSales: Number(totalSales) || sanityProducer.stats?.totalSales || 0,
+            totalBeats: sanityProducer.stats?.totalBeats || 0,
+            totalSales: sanityProducer.stats?.totalSales || 0,
             isVerified: sanityProducer.verified || false,
             profileImage: sanityProducer.profileImage ? urlFor(sanityProducer.profileImage).url() : null,
             coverImage: sanityProducer.coverImage ? urlFor(sanityProducer.coverImage).url() : null,
             walletAddress: sanityProducer.walletAddress || null
-          })
+          }
+          
+          setProducer(producerData)
+          setWeb3Enabled(!!producerData.walletAddress && producerData.walletAddress.startsWith('0x'))
           setLoading(false)
           return
         }
         
         // Fallback to Web3 profile
-        const profileKey = `web3_profile_${producerId.toLowerCase()}`
-        const storedProfile = localStorage.getItem(profileKey)
+        if (typeof window !== 'undefined') {
+          const profileKey = `web3_profile_${producerId.toLowerCase()}`
+          const storedProfile = localStorage.getItem(profileKey)
+          
+          if (storedProfile && isMounted) {
+            const profile = JSON.parse(storedProfile)
+            const producerData = {
+              id: producerId,
+              name: profile.displayName || 'Beat Creator',
+              displayName: profile.displayName || 'Beat Creator',
+              bio: profile.bio || 'Beat creator on BeatsChain platform.',
+              location: profile.location || 'South Africa',
+              genres: profile.genres || ['Hip Hop'],
+              totalBeats: 0,
+              totalSales: 0,
+              isVerified: profile.isVerified || false,
+              profileImage: profile.profileImage || null,
+              coverImage: profile.coverImage || null,
+              walletAddress: profile.walletAddress || null
+            }
+            
+            setProducer(producerData)
+            setWeb3Enabled(!!producerData.walletAddress && producerData.walletAddress.startsWith('0x'))
+            setLoading(false)
+            return
+          }
+        }
         
-        if (storedProfile && isMounted) {
-          const profile = JSON.parse(storedProfile)
-          setProducer({
-            id: producerId,
-            name: profile.displayName || 'Beat Creator',
-            displayName: profile.displayName || 'Beat Creator',
-            bio: profile.bio || 'Beat creator on BeatsChain platform.',
-            location: profile.location || 'South Africa',
-            genres: profile.genres || ['Hip Hop'],
-            totalBeats: 0,
-            totalSales: 0,
-            isVerified: profile.isVerified || false,
-            profileImage: profile.profileImage || null,
-            coverImage: profile.coverImage || null
-          })
-          
-          // Beats will be loaded in separate useEffect
-          
-          setLoading(false)
-        } else if (isMounted) {
-          // Default producer if not found
+        // Default producer if not found
+        if (isMounted) {
           setProducer({
             id: producerId,
             name: 'Beat Creator',
@@ -121,7 +210,8 @@ export default function ProducerPage() {
             totalSales: 0,
             isVerified: false,
             profileImage: null,
-            coverImage: null
+            coverImage: null,
+            walletAddress: null
           })
           setBeats([])
           setLoading(false)
@@ -140,7 +230,8 @@ export default function ProducerPage() {
             totalSales: 0,
             isVerified: false,
             profileImage: null,
-            coverImage: null
+            coverImage: null,
+            walletAddress: null
           })
           setBeats([])
           setLoading(false)
@@ -154,69 +245,6 @@ export default function ProducerPage() {
       isMounted = false
     }
   }, [producerId])
-  
-  // Separate effect for loading beats when producer data is available
-  useEffect(() => {
-    if (!producer?.walletAddress || !producer.walletAddress.startsWith('0x')) return
-    
-    const loadBeats = async () => {
-      try {
-        const { readContract } = await import('wagmi/actions')
-        const { config } = await import('@/lib/wagmi')
-        
-        // Get producer's NFT balance
-        const balance = await readContract(config, {
-          address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
-          abi: beatNFTABI,
-          functionName: 'balanceOf',
-          args: [producer.walletAddress as `0x${string}`]
-        })
-        
-        // For now, create mock data since we need to iterate through tokens
-        const tokenIds = Array.from({ length: Number(balance) }, (_, i) => BigInt(i + 1))
-        
-        // Fetch metadata for each token
-        const beatPromises = tokenIds.map(async (tokenId: bigint) => {
-          try {
-            const tokenURI = await readContract(config, {
-              address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
-              abi: beatNFTABI,
-              functionName: 'tokenURI',
-              args: [tokenId]
-            })
-            
-            // Fetch IPFS metadata
-            const ipfsUrl = tokenURI.replace('ipfs://', process.env.NEXT_PUBLIC_IPFS_GATEWAY || 'https://gateway.pinata.cloud/ipfs/')
-            const response = await fetch(ipfsUrl)
-            const metadata = await response.json()
-            
-            return {
-              id: tokenId.toString(),
-              title: metadata.name || 'Untitled Beat',
-              genre: metadata.attributes?.find((attr: any) => attr.trait_type === 'Genre')?.value || 'Unknown',
-              bpm: metadata.attributes?.find((attr: any) => attr.trait_type === 'BPM')?.value || 120,
-              key: metadata.attributes?.find((attr: any) => attr.trait_type === 'Key')?.value || 'C',
-              price: parseFloat(metadata.attributes?.find((attr: any) => attr.trait_type === 'Price')?.value || '0'),
-              coverImageUrl: metadata.image?.replace('ipfs://', process.env.NEXT_PUBLIC_IPFS_GATEWAY || 'https://gateway.pinata.cloud/ipfs/'),
-              audioUrl: metadata.animation_url?.replace('ipfs://', process.env.NEXT_PUBLIC_IPFS_GATEWAY || 'https://gateway.pinata.cloud/ipfs/'),
-              stageName: producer.name
-            }
-          } catch (error) {
-            console.warn('Failed to fetch metadata for token:', tokenId, error)
-            return null
-          }
-        })
-        
-        const beats = (await Promise.all(beatPromises)).filter(Boolean)
-        setBeats(beats)
-      } catch (error) {
-        console.warn('Could not load producer beats from Web3:', error)
-        setBeats([])
-      }
-    }
-    
-    loadBeats()
-  }, [producer?.walletAddress, producer?.name])
 
   const genres = [
     'all', 'amapiano', 'afrobeats', 'house', 'deep-house', 'tech-house', 'trap', 
@@ -224,8 +252,20 @@ export default function ProducerPage() {
     'trance', 'dubstep', 'drum-bass', 'garage', 'breakbeat', 'ambient'
   ]
 
+  // Filter beats by selected genre
+  const filteredBeats = selectedGenre === 'all' 
+    ? beats 
+    : beats.filter(beat => beat.genre?.toLowerCase() === selectedGenre)
+
   return (
     <div>
+      {/* Web3 Data Fetching Component */}
+      {!loading && producer && web3Enabled && (
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
+          <Web3ProducerData producer={producer} onBeatsLoaded={handleBeatsLoaded} />
+        </ErrorBoundary>
+      )}
+      
       {/* Hero Section */}
       <div style={{
         height: '400px',
@@ -306,7 +346,7 @@ export default function ProducerPage() {
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#1f2937' }}>
-              Beats Collection ({beats?.length || 0})
+              Beats Collection ({filteredBeats?.length || 0})
             </h2>
           </div>
           
@@ -315,7 +355,7 @@ export default function ProducerPage() {
               <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🎵</div>
               <p>Loading beats...</p>
             </div>
-          ) : !beats || beats.length === 0 ? (
+          ) : !filteredBeats || filteredBeats.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '4rem 2rem', color: '#6b7280' }}>
               <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🎵</div>
               <h3 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '0.5rem', color: '#1f2937' }}>No beats uploaded yet</h3>
@@ -327,7 +367,7 @@ export default function ProducerPage() {
               gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
               gap: '1.5rem'
             }}>
-              {beats.map((beat) => (
+              {filteredBeats.map((beat) => (
                 <div key={beat.id} style={{
                   background: 'white',
                   borderRadius: '0.5rem',

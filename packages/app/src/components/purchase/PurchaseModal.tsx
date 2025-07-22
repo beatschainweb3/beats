@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Beat } from '@/types'
 import { useWeb3Auth } from '@/hooks/useWeb3Auth'
 import { toast } from 'react-toastify'
 import { useAccount } from 'wagmi'
+import { getEthExchangeRate, getCurrencySymbol } from '@/utils/currency'
 
 interface PurchaseModalProps {
   beat: Beat
@@ -37,6 +38,24 @@ export default function PurchaseModal({
   const [selectedLicense, setSelectedLicense] = useState('premium')
   const [processing, setProcessing] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState('crypto')
+  const [exchangeRate, setExchangeRate] = useState<number | null>(null)
+  const [currency] = useState('ZAR')
+  
+  // Fetch exchange rate on component mount
+  useEffect(() => {
+    async function fetchExchangeRate() {
+      try {
+        const rate = await getEthExchangeRate(currency)
+        setExchangeRate(rate)
+      } catch (error) {
+        console.error('Failed to fetch exchange rate:', error)
+        // Use fallback rate
+        setExchangeRate(18000) // Fallback: 1 ETH ≈ R18,000
+      }
+    }
+    
+    fetchExchangeRate()
+  }, [currency])
 
   const licenses: License[] = [
     {
@@ -79,9 +98,12 @@ export default function PurchaseModal({
     return `${ethPrice.toFixed(4)} ETH`
   }
   
-  const formatPriceWithZAR = (ethPrice: number) => {
-    const zarPrice = ethPrice * 18000 // 1 ETH ≈ R18,000
-    return `${ethPrice.toFixed(4)} ETH (~R${zarPrice.toLocaleString()})`
+  const formatPriceWithFiat = (ethPrice: number) => {
+    if (!exchangeRate) return formatPrice(ethPrice)
+    
+    const fiatPrice = ethPrice * exchangeRate
+    const symbol = getCurrencySymbol(currency)
+    return `${ethPrice.toFixed(4)} ETH (~${symbol}${fiatPrice.toLocaleString()})`
   }
 
   const handlePurchase = async () => {
@@ -202,7 +224,9 @@ export default function PurchaseModal({
                           {formatPrice(license.price)}
                         </div>
                         <div className="text-sm text-gray-500">
-                          ~R{(license.price * 18000).toLocaleString()}
+                          {exchangeRate ? 
+                            `~${getCurrencySymbol(currency)}${(license.price * exchangeRate).toLocaleString()}` : 
+                            'Loading...'}
                         </div>
                         {license.originalPrice && license.originalPrice > license.price && (
                           <div className="text-sm text-gray-500 line-through">
@@ -279,12 +303,12 @@ export default function PurchaseModal({
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Price:</span>
-                      <span className="font-medium">{formatPriceWithZAR(selectedLicenseData.price)}</span>
+                      <span className="font-medium">{formatPriceWithFiat(selectedLicenseData.price)}</span>
                     </div>
                     <div className="border-t border-gray-200 pt-3">
                       <div className="flex justify-between text-lg font-semibold">
                         <span>Total:</span>
-                        <span className="text-green-600">{formatPriceWithZAR(selectedLicenseData.price)}</span>
+                        <span className="text-green-600">{formatPriceWithFiat(selectedLicenseData.price)}</span>
                       </div>
                     </div>
                   </div>
