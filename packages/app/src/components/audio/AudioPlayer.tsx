@@ -121,7 +121,7 @@ export default function AudioPlayer({
   const maxTime = previewMode ? Math.min(duration, 30) : duration
 
   return (
-    <div style={{ backgroundColor: 'white', borderRadius: '0.5rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', border: '1px solid #e5e7eb', padding: '1rem' }}>
+    <div className="bg-white rounded-lg shadow-sm border p-4">
       <audio
         ref={audioRef}
         src={beat.audioUrl}
@@ -130,27 +130,27 @@ export default function AudioPlayer({
       />
 
       {/* Beat Info */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+      <div className="flex items-center gap-3 mb-4">
         {beat.coverImageUrl && (
           <img
             src={beat.coverImageUrl}
             alt={beat.title}
-            style={{ width: '3rem', height: '3rem', borderRadius: '0.25rem', objectFit: 'cover' }}
+            className="w-12 h-12 rounded object-cover"
           />
         )}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <h3 style={{ fontWeight: 500, color: '#1f2937', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{beat.title}</h3>
-          <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-medium text-gray-900 truncate">{beat.title}</h3>
+          <p className="text-sm text-gray-500">
             {beat.genre} • {beat.bpm} BPM • {beat.key}
           </p>
         </div>
         {previewMode && (
-          <span style={{ fontSize: '0.75rem', backgroundColor: '#ffedd5', color: '#9a3412', padding: '0.25rem 0.5rem', borderRadius: '0.25rem' }}>
+          <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded">
             30s Preview
           </span>
         )}
         {!previewMode && !allowFullAccess && (
-          <span style={{ fontSize: '0.75rem', backgroundColor: '#dbeafe', color: '#1e40af', padding: '0.25rem 0.5rem', borderRadius: '0.25rem' }}>
+          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
             Full Access
           </span>
         )}
@@ -158,58 +158,61 @@ export default function AudioPlayer({
 
       {/* Waveform Placeholder */}
       {showWaveform && (
-        <div style={{ marginBottom: '1rem', height: '4rem', background: 'linear-gradient(to right, #dbeafe, #e0e7ff)', borderRadius: '0.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ width: '100%', height: '1rem', position: 'relative', backgroundColor: '#93c5fd', borderRadius: '0.25rem', opacity: 0.3 }}>
-            <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: currentTime && maxTime ? ((currentTime / maxTime) * 100) + '%' : '0%', backgroundColor: '#3b82f6', borderRadius: '0.25rem' }}></div>
+        <div className="mb-4 h-16 bg-gradient-to-r from-blue-100 to-purple-100 rounded flex items-center justify-center">
+          <div className="w-full h-4 bg-blue-200 bg-opacity-30 rounded relative">
+            <div 
+              className="absolute left-0 top-0 h-full bg-blue-500 rounded" 
+              style={{ width: currentTime && maxTime ? `${(currentTime / maxTime) * 100}%` : '0%' }}
+            ></div>
           </div>
         </div>
       )}
 
       {/* Error Message */}
       {error && (
-        <div style={{ marginBottom: '0.75rem', padding: '0.5rem', backgroundColor: '#fef2f2', border: '1px solid #fee2e2', borderRadius: '0.25rem', color: '#b91c1c', fontSize: '0.875rem' }}>
+        <div className="mb-3 p-2 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
           ⚠️ {error}
         </div>
       )}
 
       {/* Controls */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      <div className="space-y-3">
         {/* Play/Pause & Time */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <div className="flex items-center gap-3">
           <button
             onClick={togglePlay}
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '2.5rem', height: '2.5rem', backgroundColor: '#2563eb', color: 'white', borderRadius: '9999px', border: 'none', cursor: 'pointer' }}
+            className="flex items-center justify-center w-10 h-10 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors"
           >
             {isPlaying ? (
-              <svg style={{ width: '1rem', height: '1rem' }} fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
               </svg>
             ) : (
-              <svg style={{ width: '1rem', height: '1rem', marginLeft: '0.125rem' }} fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M8 5v14l11-7z"/>
               </svg>
             )}
           </button>
 
-          <div style={{ flex: 1 }}>
+          <div className="flex-1">
             <input
               type="range"
               min="0"
               max={maxTime || 0}
               value={currentTime}
               onChange={handleSeek}
-              style={{ width: '100%', height: '0.5rem', backgroundColor: '#e5e7eb', borderRadius: '0.5rem', appearance: 'none', cursor: 'pointer' }}
+              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
             />
           </div>
 
-          <div style={{ fontSize: '0.875rem', color: '#6b7280', minWidth: 0 }}>
+          <div className="text-sm text-gray-500 min-w-0">
             {formatTime(currentTime)} / {formatTime(maxTime)}
           </div>
         </div>
 
         {/* Volume */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <svg style={{ width: '1rem', height: '1rem', color: '#9ca3af' }} fill="currentColor" viewBox="0 0 24 24">
+        <div className="flex items-center gap-2">
+          <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
             <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
           </svg>
           <input
@@ -219,7 +222,7 @@ export default function AudioPlayer({
             step="0.1"
             value={volume}
             onChange={handleVolumeChange}
-            style={{ width: '5rem', height: '0.5rem', backgroundColor: '#e5e7eb', borderRadius: '0.5rem', appearance: 'none', cursor: 'pointer' }}
+            className="w-20 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
           />
         </div>
       </div>
