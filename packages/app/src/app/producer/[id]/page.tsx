@@ -16,20 +16,6 @@ export default function ProducerPage() {
   const [loading, setLoading] = useState(true)
   
   useEffect(() => {
-    // Set default producer data immediately to avoid undefined errors
-    const defaultProducer: Producer = {
-      id: producerId || 'unknown',
-      name: 'Beat Creator',
-      bio: 'Beat creator on BeatsChain platform.',
-      location: 'South Africa',
-      genres: ['Hip Hop'],
-      totalBeats: 0,
-      totalSales: 0,
-      verified: false
-    }
-    
-    setProducer(defaultProducer)
-    
     async function loadData() {
       if (!producerId || typeof producerId !== 'string') {
         console.warn('Invalid producer ID:', producerId)
@@ -58,7 +44,6 @@ export default function ProducerPage() {
         }
       } catch (error) {
         console.error('Error loading producer data:', error)
-        // Producer already set to default above
       } finally {
         setLoading(false)
       }
@@ -78,12 +63,49 @@ export default function ProducerPage() {
     ? beats 
     : beats.filter(beat => beat.genre?.toLowerCase() === selectedGenre)
 
+  // Show loading state
+  if (loading) {
+    return (
+      <div style={{ textAlign: 'center', padding: '4rem 2rem', color: '#6b7280' }}>
+        <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🎵</div>
+        <p>Loading producer data...</p>
+      </div>
+    )
+  }
+
+  // Show not found state if no producer data
+  if (!producer) {
+    return (
+      <div style={{ textAlign: 'center', padding: '4rem 2rem', color: '#6b7280' }}>
+        <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🎵</div>
+        <h3 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '0.5rem', color: '#1f2937' }}>
+          Producer not found
+        </h3>
+        <p>The producer you're looking for doesn't exist or has been removed.</p>
+        <a 
+          href="/producers"
+          style={{
+            display: 'inline-block',
+            marginTop: '1rem',
+            padding: '0.5rem 1rem',
+            background: '#3b82f6',
+            color: 'white',
+            borderRadius: '0.375rem',
+            textDecoration: 'none'
+          }}
+        >
+          Browse All Producers
+        </a>
+      </div>
+    )
+  }
+
   return (
     <div>
       {/* Hero Section */}
       <div style={{
         height: '400px',
-        background: producer?.coverImageUrl 
+        background: producer.coverImageUrl 
           ? `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url(${producer.coverImageUrl})`
           : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
         backgroundSize: 'cover',
@@ -97,7 +119,7 @@ export default function ProducerPage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
             <div style={{
               width: '80px', height: '80px', borderRadius: '50%',
-              background: producer?.profileImageUrl 
+              background: producer.profileImageUrl 
                 ? `url(${producer.profileImageUrl})` 
                 : 'rgba(255,255,255,0.2)',
               backgroundSize: 'cover',
@@ -105,14 +127,14 @@ export default function ProducerPage() {
               display: 'flex',
               alignItems: 'center', justifyContent: 'center', fontSize: '2rem'
             }}>
-              {!producer?.profileImageUrl && '🎵'}
+              {!producer.profileImageUrl && '🎵'}
             </div>
             <div>
               <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold', margin: 0 }}>
-                {producer?.name || 'Beat Creator'} {producer?.verified ? ' ✓' : ''}
+                {producer.name} {producer.verified ? ' ✓' : ''}
               </h1>
               <p style={{ fontSize: '1.125rem', opacity: 0.9, margin: 0 }}>
-                {producer?.location || 'Unknown'} • {beats?.length || 0} beats • {producer?.totalSales || 0} sales
+                {producer.location || 'Unknown'} • {beats?.length || 0} beats • {producer.totalSales || 0} sales
               </p>
             </div>
           </div>
@@ -128,11 +150,11 @@ export default function ProducerPage() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
             <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#1f2937' }}>About</h2>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <SocialShare size="sm" title={`Check out ${producer?.name || 'this producer'} on BeatsChain`} />
+              <SocialShare size="sm" title={`Check out ${producer.name} on BeatsChain`} />
             </div>
           </div>
           <p style={{ color: '#6b7280', lineHeight: '1.6' }}>
-            {producer?.bio || 'Beat creator on BeatsChain platform.'}
+            {producer.bio || 'Beat creator on BeatsChain platform.'}
           </p>
         </div>
 
@@ -164,12 +186,7 @@ export default function ProducerPage() {
             </h2>
           </div>
           
-          {loading ? (
-            <div style={{ textAlign: 'center', padding: '4rem 2rem', color: '#6b7280' }}>
-              <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🎵</div>
-              <p>Loading beats...</p>
-            </div>
-          ) : !filteredBeats || filteredBeats.length === 0 ? (
+          {!filteredBeats || filteredBeats.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '4rem 2rem', color: '#6b7280' }}>
               <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🎵</div>
               <h3 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '0.5rem', color: '#1f2937' }}>No beats uploaded yet</h3>
