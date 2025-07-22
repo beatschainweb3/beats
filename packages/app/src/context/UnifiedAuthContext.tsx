@@ -64,7 +64,7 @@ export function UnifiedAuthProvider({ children }: { children: ReactNode }) {
   const { profile: web3Profile, loading: profileLoading } = useWeb3Profile()
   
   const { user: siweUser, signIn: siweSignIn, signOut: siweSignOut, isAuthenticated: siweAuth } = siweContext || {
-    user: null, signIn: null, signOut: null, isAuthenticated: false
+    user: null, signIn: async () => {}, signOut: async () => {}, isAuthenticated: false
   }
   const { user: firebaseUser, userProfile: firebaseProfile } = authContext || {
     user: null, userProfile: null
@@ -237,9 +237,13 @@ export function UnifiedAuthProvider({ children }: { children: ReactNode }) {
   }
 
   const signIn = async () => {
-    if (isConnected && address && siweSignIn) {
+    if (isConnected && address) {
       try {
-        await siweSignIn()
+        if (siweSignIn) {
+          await siweSignIn()
+        } else {
+          console.warn('SIWE sign in not available')
+        }
       } catch (error) {
         console.error('Sign in failed:', error)
       }

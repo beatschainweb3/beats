@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Beat } from '@/types/data'
 import { useUnifiedAuth } from '@/context/UnifiedAuthContext'
-import { toast } from 'react-toastify'
 
 interface SanityBeatCardProps {
   beat: Beat
@@ -48,7 +47,10 @@ export default function SanityBeatCard({ beat, onPurchase }: SanityBeatCardProps
 
   const togglePlay = async () => {
     const audio = audioRef.current
-    if (!audio) return
+    if (!audio || !beat.audioUrl) {
+      console.warn('Audio preview not available')
+      return
+    }
 
     try {
       if (isPlaying) {
@@ -60,7 +62,6 @@ export default function SanityBeatCard({ beat, onPurchase }: SanityBeatCardProps
       }
     } catch (error) {
       console.error('Audio play error:', error)
-      toast.error('Unable to play audio')
     }
   }
 
@@ -77,7 +78,7 @@ export default function SanityBeatCard({ beat, onPurchase }: SanityBeatCardProps
 
   const handlePurchase = () => {
     if (!user) {
-      toast.error('Please sign in to purchase beats')
+      console.warn('Please sign in to purchase beats')
       return
     }
     if (onPurchase) onPurchase(beat.id)
@@ -85,11 +86,11 @@ export default function SanityBeatCard({ beat, onPurchase }: SanityBeatCardProps
 
   const handleLike = () => {
     if (!user) {
-      toast.error('Please sign in to like beats')
+      console.warn('Please sign in to like beats')
       return
     }
     setIsLiked(!isLiked)
-    toast.success(isLiked ? 'Removed from favorites' : 'Added to favorites')
+    console.log(isLiked ? 'Removed from favorites' : 'Added to favorites')
   }
 
   const formatTime = (time: number) => {
@@ -204,15 +205,17 @@ export default function SanityBeatCard({ beat, onPurchase }: SanityBeatCardProps
       </div>
       
       {/* Hidden Audio Element */}
-      <audio
-        ref={audioRef}
-        src={beat.audioUrl || ''}
-        preload="metadata"
-        onError={() => {
-          console.warn('Audio failed to load:', beat.audioUrl)
-          setIsLoading(false)
-        }}
-      />
+      {beat.audioUrl && (
+        <audio
+          ref={audioRef}
+          src={beat.audioUrl}
+          preload="metadata"
+          onError={() => {
+            console.warn('Audio failed to load:', beat.audioUrl)
+            setIsLoading(false)
+          }}
+        />
+      )}
     </div>
   )
 }

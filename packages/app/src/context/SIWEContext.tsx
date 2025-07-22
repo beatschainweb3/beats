@@ -87,6 +87,8 @@ export function SIWEProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     if (!isConnected) {
       setUser(null)
     }

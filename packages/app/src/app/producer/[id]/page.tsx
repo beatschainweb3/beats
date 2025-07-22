@@ -264,20 +264,24 @@ export default function ProducerPage() {
                       
                       {/* Audio Player */}
                       {beat.audioUrl && (
-                        <AudioPlayer
-                          beat={{
-                            id: beat.id,
-                            title: beat.title,
-                            genre: beat.genre,
-                            bpm: beat.bpm,
-                            key: beat.key,
-                            audioUrl: beat.audioUrl,
-                            coverImageUrl: beat.coverImageUrl,
-                            stageName: beat.producerName
-                          }}
-                          previewMode={true}
-                          showWaveform={false}
-                        />
+                        <div style={{ marginTop: '1rem' }}>
+                          <AudioPlayer
+                            beat={{
+                              id: beat.id,
+                              title: beat.title,
+                              genre: beat.genre,
+                              bpm: beat.bpm,
+                              key: beat.key,
+                              audioUrl: beat.audioUrl,
+                              coverImageUrl: beat.coverImageUrl,
+                              producerName: beat.producerName,
+                              price: beat.price,
+                              isNFT: beat.isNFT || false
+                            }}
+                            previewMode={true}
+                            showWaveform={false}
+                          />
+                        </div>
                       )}
                     </div>
                   </div>
