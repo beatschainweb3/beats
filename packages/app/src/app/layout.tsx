@@ -12,6 +12,7 @@ import { NotificationProvider } from '@/context/Notifications'
 import { ClientOnly } from '@/components/ClientOnly'
 import CookieConsentBanner from '@/components/CookieConsentBanner'
 import PWAInstallPrompt from '@/components/PWAInstallPrompt'
+import { Toaster } from 'react-hot-toast'
 
 import '../assets/globals.css'
 
@@ -144,6 +145,7 @@ export default function RootLayout(props: PropsWithChildren) {
                       <Layout>{props.children}</Layout>
                       <CookieConsentBanner />
                       <PWAInstallPrompt />
+                      <Toaster position="top-right" />
                     </NotificationProvider>
                   </UnifiedAuthProvider>
                 </SIWEProvider>

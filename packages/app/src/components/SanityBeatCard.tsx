@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Beat } from '@/types/data'
 import { useUnifiedAuth } from '@/context/UnifiedAuthContext'
+import { toast } from 'react-hot-toast'
 
 interface SanityBeatCardProps {
   beat: Beat
@@ -48,7 +49,7 @@ export default function SanityBeatCard({ beat, onPurchase }: SanityBeatCardProps
   const togglePlay = async () => {
     const audio = audioRef.current
     if (!audio || !beat.audioUrl) {
-      console.warn('Audio preview not available')
+      toast.error('Audio preview not available')
       return
     }
 
@@ -62,6 +63,7 @@ export default function SanityBeatCard({ beat, onPurchase }: SanityBeatCardProps
       }
     } catch (error) {
       console.error('Audio play error:', error)
+      toast.error('Unable to play audio')
     }
   }
 
@@ -78,7 +80,7 @@ export default function SanityBeatCard({ beat, onPurchase }: SanityBeatCardProps
 
   const handlePurchase = () => {
     if (!user) {
-      console.warn('Please sign in to purchase beats')
+      toast.error('Please sign in to purchase beats')
       return
     }
     if (onPurchase) onPurchase(beat.id)
@@ -86,11 +88,11 @@ export default function SanityBeatCard({ beat, onPurchase }: SanityBeatCardProps
 
   const handleLike = () => {
     if (!user) {
-      console.warn('Please sign in to like beats')
+      toast.error('Please sign in to like beats')
       return
     }
     setIsLiked(!isLiked)
-    console.log(isLiked ? 'Removed from favorites' : 'Added to favorites')
+    toast.success(isLiked ? 'Removed from favorites' : 'Added to favorites')
   }
 
   const formatTime = (time: number) => {
