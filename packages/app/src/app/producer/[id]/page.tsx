@@ -61,7 +61,7 @@ export default function ProducerPage() {
   // Filter beats by selected genre
   const filteredBeats = selectedGenre === 'all' 
     ? beats 
-    : beats.filter(beat => beat.genre?.toLowerCase() === selectedGenre)
+    : beats.filter(beat => beat.genre?.toLowerCase() === selectedGenre.toLowerCase())
 
   // Show loading state
   if (loading) {
@@ -135,6 +135,9 @@ export default function ProducerPage() {
               </h1>
               <p style={{ fontSize: '1.125rem', opacity: 0.9, margin: 0 }}>
                 {producer.location || 'Unknown'} • {beats?.length || 0} beats • {producer.totalSales || 0} sales
+              </p>
+              <p style={{ fontSize: '0.875rem', opacity: 0.8, margin: '0.5rem 0 0 0' }}>
+                {producer.genres && producer.genres.length > 0 ? producer.genres.join(', ') : 'Various Genres'}
               </p>
             </div>
           </div>
