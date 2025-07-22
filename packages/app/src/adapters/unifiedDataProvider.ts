@@ -163,10 +163,10 @@ export class UnifiedDataProvider implements DataAdapter {
     }
   }
 
-  async getFeaturedBeats(limit: number = 6): Promise<Beat[]> {
+  async getFeaturedBeats(limit?: number): Promise<Beat[]> {
     try {
       // For now, just use Sanity featured beats
-      const beats = await this.sanityAdapter.getFeaturedBeats(limit);
+      const beats = await this.sanityAdapter.getFeaturedBeats();
       return beats;
     } catch (error) {
       console.error('Error in getFeaturedBeats:', error);

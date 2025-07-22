@@ -32,7 +32,8 @@ export default function MarketplacePage() {
         
         // Get featured beats from unified provider
         try {
-          const fetchedBeats = await dataProvider.getFeaturedBeats(12)
+          const fetchedBeats = await dataProvider.getFeaturedBeats()
+          console.log('Fetched beats:', fetchedBeats.length)
           setBeats(fetchedBeats)
         } catch (beatsError) {
           console.error('Error fetching beats:', beatsError)

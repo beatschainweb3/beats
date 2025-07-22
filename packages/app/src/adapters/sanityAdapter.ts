@@ -150,7 +150,7 @@ export class SanityAdapter implements DataAdapter {
     try {
       // First try to get featured beats
       let beats = await client.fetch(`
-        *[_type == "beat" && featured == true][0..${limit-1}] {
+        *[_type == "beat" && featured == true] {
           _id, title, slug, description, producer->{name, slug},
           stageName, genre, bpm, key, price, audioFile, coverImage
         }
@@ -159,7 +159,7 @@ export class SanityAdapter implements DataAdapter {
       // If no featured beats, get any beats up to the limit
       if (!beats || beats.length === 0) {
         beats = await client.fetch(`
-          *[_type == "beat"][0..${limit-1}] {
+          *[_type == "beat"] {
             _id, title, slug, description, producer->{name, slug},
             stageName, genre, bpm, key, price, audioFile, coverImage
           }

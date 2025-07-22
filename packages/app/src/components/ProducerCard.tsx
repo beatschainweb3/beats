@@ -5,17 +5,7 @@ import { useCardStyles } from '@/hooks/useCardStyles'
 import OptimizedImage from './OptimizedImage'
 import { normalizeImageSource } from '@/utils/imageOptimization'
 
-interface Producer {
-  id: string
-  name: string
-  location?: string
-  genre?: string
-  totalBeats?: number
-  totalSales?: number
-  rating?: number
-  verified?: boolean
-  profileImage?: string
-}
+import { Producer } from '@/types/data'
 
 interface ProducerCardProps {
   producer: Producer
@@ -53,9 +43,9 @@ export default function ProducerCard({ producer }: ProducerCardProps) {
           fontSize: '1.5rem',
           position: 'relative'
         }}>
-          {producer.profileImage ? (
+          {producer.profileImageUrl ? (
             <OptimizedImage 
-              src={normalizeImageSource(producer.profileImage)} 
+              src={normalizeImageSource(producer.profileImageUrl)} 
               alt={`${producer.name}'s profile`}
               fill
               sizes="96px"
@@ -93,11 +83,11 @@ export default function ProducerCard({ producer }: ProducerCardProps) {
 
       {/* Producer Stats */}
       <div style={{ marginBottom: '1rem' }}>
-        {producer.genre && (
+        {producer.genres && producer.genres.length > 0 && (
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
             <span style={{ color: '#6b7280', fontSize: '0.875rem' }}>Genres:</span>
             <span style={{ color: '#1f2937', fontSize: '0.875rem', fontWeight: '500' }}>
-              {producer.genre}
+              {producer.genres.join(', ')}
             </span>
           </div>
         )}
