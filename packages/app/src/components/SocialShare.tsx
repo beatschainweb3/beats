@@ -99,7 +99,7 @@ export default function SocialShare({
           <span className={iconClasses[size]}>{link.icon}</span>
           {showLabels && <span>{link.name}</span>}
         </a>
-      ))
+      ))}
       
       <button
         onClick={copyToClipboard}
