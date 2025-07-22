@@ -1,4 +1,4 @@
-# BeatsChain Metadata Improvements - July 21, 2024
+# BeatsChain Metadata Improvements - July 21, 2025
 
 ## Overview
 

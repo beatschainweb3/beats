@@ -1,4 +1,4 @@
-# Blog Hero Image Fix - July 21, 2024
+# Blog Hero Image Fix - July 21, 2025
 
 ## Issue Analysis
 
