@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import SocialShare from '@/components/SocialShare'
-import AudioPlayer from '@/components/audio/AudioPlayer'
 import { dataProvider } from '@/adapters/unifiedDataProvider'
 import { Beat, Producer } from '@/types/data'
 
