@@ -55,9 +55,11 @@ export function generateSocialMetadata({
     }
   }
   
-  // Fallback to default OpenGraph image
+  // Generate dynamic OG image URL with proper encoding
   if (!ogImage) {
-    ogImage = `${SITE_URL}/api/og?title=${encodeURIComponent(title)}`
+    const encodedTitle = encodeURIComponent(title)
+    const encodedSubtitle = encodeURIComponent(description.substring(0, 100))
+    ogImage = `${SITE_URL}/api/og?title=${encodedTitle}&subtitle=${encodedSubtitle}&type=${type}`
   }
 
   return {
@@ -133,12 +135,12 @@ export function generateBeatMetadata(beat: any): Metadata {
  * Generate OpenGraph metadata for a producer
  */
 export function generateProducerMetadata(producer: any): Metadata {
-  const title = producer?.displayName || producer?.name || 'Producer Profile'
+  const title = producer?.name || 'Producer Profile'
   const description = producer?.bio || `Check out this producer's beats on BeatsChain`
   const path = `/producer/${producer?.id || ''}`
   
   // Use profile image if available, otherwise use cover image
-  const imageUrl = producer?.profileImage || producer?.coverImage
+  const imageUrl = producer?.profileImageUrl || producer?.coverImageUrl
   
   return generateSocialMetadata({
     title,

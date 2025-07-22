@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
     
-    // Get title from query params or use default
+    // Get parameters from query
     const title = searchParams.get('title') || 'BeatsChain'
     const subtitle = searchParams.get('subtitle') || 'Web3 Beat Marketplace'
     const type = searchParams.get('type') || 'default'
@@ -15,14 +15,15 @@ export async function GET(req: NextRequest) {
     // Choose background color based on content type
     let bgGradient = 'linear-gradient(to bottom right, #667eea, #764ba2)'
     
-    if (type === 'beat') {
+    if (type === 'music') {
       bgGradient = 'linear-gradient(to bottom right, #3b82f6, #2dd4bf)'
-    } else if (type === 'producer') {
+    } else if (type === 'profile') {
       bgGradient = 'linear-gradient(to bottom right, #8b5cf6, #ec4899)'
-    } else if (type === 'blog') {
+    } else if (type === 'article') {
       bgGradient = 'linear-gradient(to bottom right, #f43f5e, #f97316)'
     }
     
+    // Generate image response
     return new ImageResponse(
       (
         <div
@@ -111,6 +112,30 @@ export async function GET(req: NextRequest) {
     )
   } catch (error) {
     console.error('Error generating OG image:', error)
-    return new Response('Failed to generate image', { status: 500 })
+    
+    // Return a simple fallback image
+    return new ImageResponse(
+      (
+        <div
+          style={{
+            height: '100%',
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'linear-gradient(to bottom right, #667eea, #764ba2)',
+            color: 'white',
+            fontSize: 60,
+            fontWeight: 800,
+          }}
+        >
+          BeatsChain
+        </div>
+      ),
+      {
+        width: 1200,
+        height: 630,
+      }
+    )
   }
 }

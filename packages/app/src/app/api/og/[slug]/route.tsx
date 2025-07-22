@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og'
 import { NextRequest } from 'next/server'
-import { client } from '@/lib/sanity-client'
+import { SanityAdapter } from '@/adapters/sanityAdapter'
 
 export const runtime = 'edge'
 
@@ -12,8 +12,16 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
     let post = null
     let imageUrl = null
     
-    if (client) {
-      try {
+    try {
+      // Use Sanity adapter to get blog post
+      // Note: This is a simplified version since we don't have a blog post adapter yet
+      // In a real implementation, you'd create a proper blog post adapter
+      const sanityAdapter = new SanityAdapter()
+      
+      // For now, use a direct fetch since we don't have a getBlogPost method
+      const client = await import('@/lib/sanity-client').then(mod => mod.client)
+      
+      if (client) {
         post = await client.fetch(`
           *[_type == "post" && slug.current == $slug][0] {
             title,
@@ -26,14 +34,12 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
         // Get image URL if available
         if (post?.mainImage?.asset?._ref) {
           // Convert Sanity image reference to URL
-          // This is a simplified version - in production you'd use urlFor
-          const ref = post.mainImage.asset._ref
-          const [_file, id, extension] = ref.split('-')
-          imageUrl = `https://cdn.sanity.io/images/${process.env.NEXT_PUBLIC_SANITY_PROJECT_ID}/${process.env.NEXT_PUBLIC_SANITY_DATASET}/${id}.${extension}`
+          const { urlFor } = await import('@/lib/sanity-client')
+          imageUrl = urlFor(post.mainImage).url()
         }
-      } catch (error) {
-        console.warn('Failed to fetch post from Sanity:', error)
       }
+    } catch (error) {
+      console.warn('Failed to fetch post from Sanity:', error)
     }
     
     // If no post found, use fallback data
@@ -145,6 +151,30 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
     )
   } catch (error) {
     console.error('Error generating blog OG image:', error)
-    return new Response('Failed to generate image', { status: 500 })
+    
+    // Return a simple fallback image
+    return new ImageResponse(
+      (
+        <div
+          style={{
+            height: '100%',
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'linear-gradient(to bottom right, #f43f5e, #f97316)',
+            color: 'white',
+            fontSize: 60,
+            fontWeight: 800,
+          }}
+        >
+          BeatsChain Blog
+        </div>
+      ),
+      {
+        width: 1200,
+        height: 630,
+      }
+    )
   }
 }
