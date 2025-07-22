@@ -30,16 +30,17 @@ export default function SocialShare({
   const shareText = `${title} - ${description}`
   const hashtagString = hashtags.map(tag => `#${tag}`).join(' ')
   
+  // Define Tailwind classes for different sizes
   const sizeClasses = {
     sm: 'text-xs px-2 py-1',
     md: 'text-sm px-3 py-2', 
     lg: 'text-base px-4 py-3'
   }
   
-  const iconSizes = {
-    sm: '1rem',
-    md: '1.25rem',
-    lg: '1.5rem'
+  const iconClasses = {
+    sm: 'text-base',
+    md: 'text-lg', 
+    lg: 'text-xl'
   }
 
   const shareLinks = [
@@ -85,64 +86,26 @@ export default function SocialShare({
   }
 
   return (
-    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+    <div className="flex gap-2 flex-wrap items-center">
       {shareLinks.map(link => (
         <a
           key={link.name}
           href={link.url}
           target="_blank"
           rel="noopener noreferrer"
-          style={{
-            background: link.color,
-            color: 'white',
-            borderRadius: '0.375rem',
-            textDecoration: 'none',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            fontWeight: '500',
-            transition: 'all 0.2s',
-            ...sizeClasses[size]
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.opacity = '0.9'
-            e.currentTarget.style.transform = 'translateY(-1px)'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.opacity = '1'
-            e.currentTarget.style.transform = 'translateY(0)'
-          }}
+          className={`rounded no-underline flex items-center gap-2 font-medium transition-all hover:opacity-90 hover:-translate-y-0.5 text-white ${sizeClasses[size]}`}
+          style={{ backgroundColor: link.color }}
         >
-          <span style={{ fontSize: iconSizes[size] }}>{link.icon}</span>
+          <span className={iconClasses[size]}>{link.icon}</span>
           {showLabels && <span>{link.name}</span>}
         </a>
-      ))}
+      ))
       
       <button
         onClick={copyToClipboard}
-        style={{
-          background: '#6b7280',
-          color: 'white',
-          border: 'none',
-          borderRadius: '0.375rem',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          fontWeight: '500',
-          transition: 'all 0.2s',
-          ...sizeClasses[size]
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.opacity = '0.9'
-          e.currentTarget.style.transform = 'translateY(-1px)'
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.opacity = '1'
-          e.currentTarget.style.transform = 'translateY(0)'
-        }}
+        className={`bg-gray-500 text-white border-none rounded cursor-pointer flex items-center gap-2 font-medium transition-all hover:opacity-90 hover:-translate-y-0.5 ${sizeClasses[size]}`}
       >
-        <span style={{ fontSize: iconSizes[size] }}>🔗</span>
+        <span className={iconClasses[size]}>🔗</span>
         {showLabels && <span>Copy</span>}
       </button>
     </div>
