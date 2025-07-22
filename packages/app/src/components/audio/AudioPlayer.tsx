@@ -160,19 +160,8 @@ export default function AudioPlayer({
       {showWaveform && (
         <div style={{ marginBottom: '1rem', height: '4rem', background: 'linear-gradient(to right, #dbeafe, #e0e7ff)', borderRadius: '0.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.25rem', height: '2rem' }}>
-            {Array.from({ length: 50 }).map((_, i) => (
-              <div
-                key={i}
-                style={{
-                  backgroundColor: '#3b82f6',
-                  width: '0.25rem',
-                  borderTopLeftRadius: '0.125rem',
-                  borderTopRightRadius: '0.125rem',
-                  height: `${Math.random() * 100}%`,
-                  opacity: (currentTime / maxTime) * 50 > i ? 1 : 0.3
-                }}
-              />
-            ))}
+            {/* Removed dynamic waveform to avoid CSS issues */}
+            <div style={{ width: '100%', height: '1rem', backgroundColor: '#3b82f6', borderRadius: '0.25rem', opacity: 0.7 }}></div>
           </div>
         </div>
       )}
