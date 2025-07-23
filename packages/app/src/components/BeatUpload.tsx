@@ -2,10 +2,10 @@
 
 import { useState } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { useFileUpload } from '@/hooks/useFileUpload'
+import { useFileUpload } from '@/hooks/useFileUpload.enhanced'
 import { useWeb3Beats } from '@/hooks/useWeb3Beats'
 import { useWeb3Auth } from '@/hooks/useWeb3Auth'
-import { useBeatNFT } from '@/hooks/useBeatNFT'
+import { useBeatNFT } from '@/hooks/useBeatNFT.enhanced'
 import BuyBeatNFTModal from '@/components/BuyBeatNFTModal'
 import LicenseSelector from '@/components/LicenseSelector'
 import ProtectedRoute from '@/components/ProtectedRoute'
@@ -29,7 +29,7 @@ export default function BeatUpload() {
   const [showBuyModal, setShowBuyModal] = useState(false)
 
   const { user, isAuthenticated } = useWeb3Auth()
-  const { uploadBeatAudio, uploadCoverImage, uploading, progress, error } = useFileUpload()
+  const { uploadBeatAudio, uploadCoverImage, uploading, progress, error, currentOperation } = useFileUpload()
   const { refreshBeats } = useWeb3Beats()
   const { balance, canUpload, useCredits, isConnected } = useBeatNFT()
 
@@ -479,14 +479,14 @@ export default function BeatUpload() {
           />
         </div>
 
-        {/* Enhanced Upload Progress */}
+        {/* Enhanced Upload Progress with Operation Details */}
         {uploading && (
           <div style={{ background: '#f0f9ff', padding: '1rem', borderRadius: '0.375rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-              <span style={{ fontSize: '0.875rem', color: '#1e40af' }}>
-                Uploading {audioFile?.name}...
+              <span style={{ fontSize: '0.875rem', color: '#1e40af', fontWeight: '500' }}>
+                {currentOperation || `Uploading ${audioFile?.name}...`}
               </span>
-              <span style={{ fontSize: '0.875rem', color: '#1e40af' }}>{Math.round(progress)}%</span>
+              <span style={{ fontSize: '0.875rem', color: '#1e40af', fontWeight: '500' }}>{Math.round(progress)}%</span>
             </div>
             <div style={{ background: '#e0e7ff', height: '0.5rem', borderRadius: '0.25rem' }}>
               <div
@@ -499,15 +499,44 @@ export default function BeatUpload() {
                 }}
               />
             </div>
-            <p style={{ fontSize: '0.75rem', color: '#3b82f6', marginTop: '0.5rem' }}>
-              {progress < 100 ? 'Please wait while your beat is being uploaded...' : 'Processing your beat...'}
-            </p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem' }}>
+              <p style={{ fontSize: '0.75rem', color: '#3b82f6', margin: 0 }}>
+                {progress < 25 ? 'Preparing file...' :
+                 progress < 50 ? 'Uploading to IPFS...' :
+                 progress < 75 ? 'Processing file...' :
+                 progress < 100 ? 'Finalizing upload...' : 'Processing complete!'}
+              </p>
+              <p style={{ fontSize: '0.75rem', color: '#3b82f6', margin: 0 }}>
+                {Math.round(progress) === 100 ? 'Complete!' : `Step ${Math.ceil(progress/25)}/4`}
+              </p>
+            </div>
           </div>
         )}
 
         {error && (
           <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', padding: '1rem', borderRadius: '0.375rem' }}>
-            {error}
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
+              <span style={{ fontSize: '1.25rem' }}>⚠️</span>
+              <div>
+                <p style={{ margin: '0 0 0.5rem 0', fontWeight: '500' }}>Upload Error</p>
+                <p style={{ margin: 0, fontSize: '0.875rem' }}>{error}</p>
+                <button 
+                  onClick={() => window.location.reload()}
+                  style={{
+                    marginTop: '0.75rem',
+                    background: '#fee2e2',
+                    border: '1px solid #fecaca',
+                    color: '#dc2626',
+                    padding: '0.375rem 0.75rem',
+                    borderRadius: '0.25rem',
+                    fontSize: '0.75rem',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Retry Upload
+                </button>
+              </div>
+            </div>
           </div>
         )}
 

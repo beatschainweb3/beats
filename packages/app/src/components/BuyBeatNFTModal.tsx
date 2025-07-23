@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { useBeatNFT } from '@/hooks/useBeatNFT'
+import { useBeatNFT } from '@/hooks/useBeatNFT.enhanced'
 import { toast } from 'react-toastify'
 
 interface BuyBeatNFTModalProps {
@@ -13,7 +13,8 @@ interface BuyBeatNFTModalProps {
 export default function BuyBeatNFTModal({ isOpen, onClose, requiredCredits = 1 }: BuyBeatNFTModalProps) {
   const [selectedPackage, setSelectedPackage] = useState('small')
   const [loading, setLoading] = useState(false)
-  const { buyCredits, upgradeToProNFT, balance } = useBeatNFT()
+  const [purchaseError, setPurchaseError] = useState<string | null>(null)
+  const { buyCredits, upgradeToProNFT, balance, error: beatNFTError } = useBeatNFT()
 
   const packages = [
     { id: 'small', name: '10 Credits', credits: 10, price: 0.01, priceZAR: 180 },
@@ -24,19 +25,25 @@ export default function BuyBeatNFTModal({ isOpen, onClose, requiredCredits = 1 }
 
   const handlePurchase = async () => {
     setLoading(true)
+    setPurchaseError(null)
     
     try {
       const pkg = packages.find(p => p.id === selectedPackage)
-      if (!pkg) return
+      if (!pkg) {
+        setPurchaseError('Invalid package selected')
+        return
+      }
       
       let success = false
       
       if (pkg.unlimited) {
+        // Pro BeatNFT upgrade
         success = await upgradeToProNFT()
         if (success) {
           toast.success('🎉 Upgraded to Pro BeatNFT! Unlimited uploads!')
         }
       } else {
+        // Regular credits purchase
         success = await buyCredits(pkg.credits)
         if (success) {
           toast.success(`✅ Purchased ${pkg.credits} BeatNFT credits!`)
@@ -46,11 +53,19 @@ export default function BuyBeatNFTModal({ isOpen, onClose, requiredCredits = 1 }
       if (success) {
         onClose()
       } else {
-        toast.error('Purchase failed. Please try again.')
+        // If the hook has an error message, use it
+        if (beatNFTError) {
+          setPurchaseError(beatNFTError)
+        } else {
+          setPurchaseError('Purchase failed. Please try again.')
+        }
+        toast.error(beatNFTError || 'Purchase failed. Please try again.')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Purchase error:', error)
-      toast.error('Purchase failed. Please try again.')
+      const errorMessage = error?.message || 'Purchase failed. Please try again.'
+      setPurchaseError(errorMessage)
+      toast.error(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -76,6 +91,15 @@ export default function BuyBeatNFTModal({ isOpen, onClose, requiredCredits = 1 }
             <p className="text-orange-800 text-sm">
               ⚠️ You need {requiredCredits} credits but only have {balance.credits}. 
               Purchase more to continue uploading.
+            </p>
+          </div>
+        )}
+        
+        {(purchaseError || beatNFTError) && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+            <p className="text-red-800 text-sm flex items-start gap-2">
+              <span>⚠️</span>
+              <span>{purchaseError || beatNFTError}</span>
             </p>
           </div>
         )}
