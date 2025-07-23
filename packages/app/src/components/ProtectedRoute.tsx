@@ -142,7 +142,17 @@ export default function ProtectedRoute({
               <p style={{ fontSize: '1rem' }}>This signature doesn't cost any gas fees and keeps your account secure</p>
             </div>
             <button
-              onClick={signIn}
+              onClick={async () => {
+                try {
+                  await signIn()
+                  // If sign-in is successful, reload the page after a short delay
+                  setTimeout(() => {
+                    window.location.reload()
+                  }, 1000)
+                } catch (error) {
+                  console.error('Sign-in failed:', error)
+                }
+              }}
               style={{
                 background: 'white',
                 color: '#1d4ed8',

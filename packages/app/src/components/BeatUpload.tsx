@@ -56,7 +56,17 @@ export default function BeatUpload() {
     
     if (!isAuthenticated) {
       toast.error('Please sign in with your wallet to upload beats')
-      return
+      // Try to sign in automatically
+      try {
+        await signIn()
+        // Wait a moment for authentication to complete
+        await new Promise(resolve => setTimeout(resolve, 500))
+        // If still not authenticated after signing, return
+        if (!isAuthenticated) return
+      } catch (error) {
+        console.error('Auto sign-in failed:', error)
+        return
+      }
     }
     
     if (!user) {
