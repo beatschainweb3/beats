@@ -9,6 +9,7 @@ import { Web3DataProvider } from '@/context/Web3DataContext'
 import { SIWEProvider } from '@/context/SIWEContext'
 import { UnifiedAuthProvider } from '@/context/UnifiedAuthContext'
 import { NotificationProvider } from '@/context/Notifications'
+import { PurchaseProvider } from '@/context/PurchaseContext'
 import { ClientOnly } from '@/components/ClientOnly'
 import CookieConsentBanner from '@/components/CookieConsentBanner'
 import PWAInstallPrompt from '@/components/PWAInstallPrompt'
@@ -142,10 +143,12 @@ export default function RootLayout(props: PropsWithChildren) {
                 <SIWEProvider>
                   <UnifiedAuthProvider>
                     <NotificationProvider>
-                      <Layout>{props.children}</Layout>
-                      <CookieConsentBanner />
-                      <PWAInstallPrompt />
-                      <Toaster position="top-right" />
+                      <PurchaseProvider>
+                        <Layout>{props.children}</Layout>
+                        <CookieConsentBanner />
+                        <PWAInstallPrompt />
+                        <Toaster position="top-right" />
+                      </PurchaseProvider>
                     </NotificationProvider>
                   </UnifiedAuthProvider>
                 </SIWEProvider>
