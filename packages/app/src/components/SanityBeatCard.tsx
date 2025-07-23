@@ -206,15 +206,48 @@ export default function SanityBeatCard({ beat, onPurchase }: SanityBeatCardProps
         </div>
       </div>
       
-      {/* Hidden Audio Element */}
+      {/* Hidden Audio Element with Enhanced Error Handling */}
       {beat.audioUrl && (
         <audio
           ref={audioRef}
           src={beat.audioUrl}
           preload="metadata"
-          onError={() => {
+          onError={(e) => {
             console.warn('Audio failed to load:', beat.audioUrl)
-            setIsLoading(false)
+            
+            // Try to reload with cache-busting parameter
+            const audioElement = e.target as HTMLAudioElement;
+            if (audioElement && beat.audioUrl) {
+              // First try: Add cache-busting parameter
+              const cacheBuster = `?cb=${Date.now()}`;
+              const newUrl = beat.audioUrl.includes('?') 
+                ? `${beat.audioUrl}&cb=${Date.now()}` 
+                : `${beat.audioUrl}${cacheBuster}`;
+              
+              console.log('Retrying with cache-busting URL:', newUrl);
+              audioElement.src = newUrl;
+              audioElement.load();
+              
+              // Add a second error handler for the retry attempt
+              audioElement.onerror = () => {
+                console.warn('Retry failed, checking for alternative sources');
+                
+                // Try alternative IPFS gateway if it's an IPFS URL
+                if (beat.audioUrl?.includes('ipfs://')) {
+                  const alternativeGateway = 'https://gateway.pinata.cloud/ipfs/';
+                  const ipfsHash = beat.audioUrl.replace('ipfs://', '').split('?')[0];
+                  const alternativeUrl = `${alternativeGateway}${ipfsHash}`;
+                  
+                  console.log('Trying alternative IPFS gateway:', alternativeUrl);
+                  audioElement.src = alternativeUrl;
+                  audioElement.load();
+                } else {
+                  setIsLoading(false);
+                }
+              };
+            } else {
+              setIsLoading(false);
+            }
           }}
         />
       )}
