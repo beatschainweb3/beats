@@ -50,7 +50,7 @@ export default function BeatUpload() {
     
     // Validation
     if (!isAuthenticated || !user) {
-      toast.error('Please connect your wallet and sign in to upload beats')
+      toast.error('Please sign in to upload beats')
       return
     }
     

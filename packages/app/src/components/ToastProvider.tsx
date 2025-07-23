@@ -3,7 +3,7 @@
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
-// Enhanced toast styles for maximum visibility
+// Enhanced toast styles matching /beatnft page
 const toastStyles = `
   .Toastify__toast {
     background: white !important;
@@ -55,6 +55,26 @@ const toastStyles = `
   }
   .Toastify__progress-bar--warning {
     background: #f59e0b !important;
+  }
+  /* BeatNFT page specific styles */
+  .Toastify__toast-icon {
+    font-size: 20px !important;
+    margin-right: 12px !important;
+  }
+  .Toastify__toast-body {
+    font-family: 'Inter', system-ui, sans-serif !important;
+    line-height: 1.5 !important;
+  }
+  /* Animation enhancements */
+  .Toastify__toast {
+    transform: translateY(0) !important;
+    transition: transform 0.3s ease-out !important;
+  }
+  .Toastify__toast--enter {
+    transform: translateY(20px) !important;
+  }
+  .Toastify__toast--exit {
+    transform: translateY(-20px) !important;
   }
 `
 

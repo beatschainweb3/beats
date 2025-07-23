@@ -218,7 +218,7 @@ export default function ProducerPage() {
                         </button>
                       </div>
                       
-                      {/* Simple Audio Player */}
+                      {/* Enhanced Audio Player */}
                       <div className="mt-4 p-3 bg-gray-100 rounded">
                         <div className="mb-2 text-xs text-gray-500">Preview (30s)</div>
                         {beat.audioUrl ? (
@@ -227,8 +227,18 @@ export default function ProducerPage() {
                             src={beat.audioUrl}
                             className="w-full"
                             preload="metadata"
-                            onError={() => {
+                            onError={(e) => {
                               console.warn('Audio failed to load:', beat.audioUrl);
+                              // Try to reload with a cache-busting parameter
+                              const audioElement = e.target as HTMLAudioElement;
+                              if (audioElement && beat.audioUrl) {
+                                const cacheBuster = `?cb=${Date.now()}`;
+                                const newUrl = beat.audioUrl.includes('?') 
+                                  ? `${beat.audioUrl}&cb=${Date.now()}` 
+                                  : `${beat.audioUrl}${cacheBuster}`;
+                                audioElement.src = newUrl;
+                                audioElement.load();
+                              }
                             }}
                           />
                         ) : (

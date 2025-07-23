@@ -7,20 +7,24 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
     
-    // Get parameters from query
-    const title = searchParams.get('title') || 'BeatsChain'
-    const subtitle = searchParams.get('subtitle') || 'Web3 Beat Marketplace'
+    // Get parameters from query with proper decoding
+    const title = decodeURIComponent(searchParams.get('title') || 'BeatsChain')
+    const subtitle = decodeURIComponent(searchParams.get('subtitle') || 'Web3 Beat Marketplace')
     const type = searchParams.get('type') || 'default'
     
     // Choose background color based on content type
     let bgGradient = 'linear-gradient(to bottom right, #667eea, #764ba2)'
+    let emoji = '🎵'
     
     if (type === 'music') {
       bgGradient = 'linear-gradient(to bottom right, #3b82f6, #2dd4bf)'
+      emoji = '🎧'
     } else if (type === 'profile') {
       bgGradient = 'linear-gradient(to bottom right, #8b5cf6, #ec4899)'
+      emoji = '👤'
     } else if (type === 'article') {
       bgGradient = 'linear-gradient(to bottom right, #f43f5e, #f97316)'
+      emoji = '📝'
     }
     
     // Generate image response
@@ -61,9 +65,13 @@ export async function GET(req: NextRequest) {
                 color: '#764ba2',
                 padding: '8px 16px',
                 borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
               }}
             >
-              BeatsChain
+              <span>{emoji}</span>
+              <span>BeatsChain</span>
             </div>
           </div>
           
@@ -78,6 +86,8 @@ export async function GET(req: NextRequest) {
                 fontWeight: 400,
                 opacity: 0.9,
                 marginTop: 20,
+                maxWidth: '800px',
+                lineHeight: 1.4,
               }}
             >
               {subtitle}
@@ -108,6 +118,11 @@ export async function GET(req: NextRequest) {
       {
         width: 1200,
         height: 630,
+        // Add cache control headers to prevent stale images
+        headers: {
+          'Cache-Control': 'public, max-age=60, s-maxage=60, stale-while-revalidate=300',
+          'Content-Type': 'image/png'
+        }
       }
     )
   } catch (error) {
@@ -121,6 +136,7 @@ export async function GET(req: NextRequest) {
             height: '100%',
             width: '100%',
             display: 'flex',
+            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
             background: 'linear-gradient(to bottom right, #667eea, #764ba2)',
@@ -129,7 +145,9 @@ export async function GET(req: NextRequest) {
             fontWeight: 800,
           }}
         >
-          BeatsChain
+          <div style={{ marginBottom: '20px' }}>🎵</div>
+          <div>BeatsChain</div>
+          <div style={{ fontSize: '30px', marginTop: '20px', opacity: 0.8 }}>Web3 Beat Marketplace</div>
         </div>
       ),
       {
