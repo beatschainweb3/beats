@@ -26,6 +26,16 @@ export default function AudioPlayer({
   const [volume, setVolume] = useState(1)
   const [error, setError] = useState<string | null>(null)
   const [canPlay, setCanPlay] = useState(false)
+  const [retryCount, setRetryCount] = useState(0)
+  const [audioSource, setAudioSource] = useState(beat.audioUrl)
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Reset audio source when beat changes
+  useEffect(() => {
+    setAudioSource(beat.audioUrl)
+    setRetryCount(0)
+    setError(null)
+  }, [beat.audioUrl])
 
   useEffect(() => {
     const audio = audioRef.current
@@ -34,14 +44,59 @@ export default function AudioPlayer({
     const updateTime = () => setCurrentTime(audio.currentTime)
     const updateDuration = () => setDuration(audio.duration)
     const handleEnded = () => setIsPlaying(false)
+    
     const handleCanPlay = () => {
       setCanPlay(true)
       setError(null)
+      setIsLoading(false)
     }
+    
+    const handleLoadStart = () => {
+      setIsLoading(true)
+    }
+    
     const handleError = () => {
-      setError('Unable to play audio')
+      console.warn(`Audio error occurred (retry ${retryCount}/3):`, audioSource)
       setCanPlay(false)
       setIsPlaying(false)
+      setIsLoading(false)
+      
+      // Implement retry logic with different strategies
+      if (retryCount < 3) {
+        setRetryCount(prev => prev + 1)
+        
+        // Different retry strategies based on retry count
+        if (retryCount === 0) {
+          // First retry: Add cache-busting parameter
+          const cacheBuster = `?cb=${Date.now()}`
+          const newUrl = audioSource.includes('?') 
+            ? `${audioSource}&cb=${Date.now()}` 
+            : `${audioSource}${cacheBuster}`
+          console.log('Retry strategy 1: Cache busting -', newUrl)
+          setAudioSource(newUrl)
+          setError('Retrying audio playback...')
+        } 
+        else if (retryCount === 1 && audioSource.includes('ipfs')) {
+          // Second retry: Try alternative IPFS gateway if it's an IPFS URL
+          const ipfsHash = audioSource.replace(/^ipfs:\/\/|^https?:\/\/[^/]+\/ipfs\//, '')
+          const alternativeGateway = 'https://gateway.pinata.cloud/ipfs/'
+          const newUrl = `${alternativeGateway}${ipfsHash}`
+          console.log('Retry strategy 2: Alternative IPFS gateway -', newUrl)
+          setAudioSource(newUrl)
+          setError('Trying alternative source...')
+        }
+        else if (retryCount === 2 && beat.sanityAudioUrl) {
+          // Third retry: Try Sanity fallback URL if available
+          console.log('Retry strategy 3: Sanity fallback -', beat.sanityAudioUrl)
+          setAudioSource(beat.sanityAudioUrl)
+          setError('Switching to backup source...')
+        }
+        else {
+          setError('Unable to play audio. Please try again later.')
+        }
+      } else {
+        setError('Unable to play audio after multiple attempts.')
+      }
     }
 
     audio.addEventListener('timeupdate', updateTime)
@@ -49,6 +104,7 @@ export default function AudioPlayer({
     audio.addEventListener('ended', handleEnded)
     audio.addEventListener('canplay', handleCanPlay)
     audio.addEventListener('error', handleError)
+    audio.addEventListener('loadstart', handleLoadStart)
 
     // Preview mode: stop at 30 seconds
     if (previewMode) {
@@ -61,14 +117,22 @@ export default function AudioPlayer({
       audio.addEventListener('timeupdate', checkPreviewLimit)
     }
 
+    // Set audio source
+    audio.src = audioSource
+    audio.load()
+
     return () => {
       audio.removeEventListener('timeupdate', updateTime)
       audio.removeEventListener('loadedmetadata', updateDuration)
       audio.removeEventListener('ended', handleEnded)
       audio.removeEventListener('canplay', handleCanPlay)
       audio.removeEventListener('error', handleError)
+      audio.removeEventListener('loadstart', handleLoadStart)
+      if (previewMode) {
+        audio.removeEventListener('timeupdate', checkPreviewLimit)
+      }
     }
-  }, [previewMode])
+  }, [previewMode, audioSource, retryCount])
 
   const togglePlay = async () => {
     const audio = audioRef.current
@@ -124,7 +188,6 @@ export default function AudioPlayer({
     <div className="bg-white rounded-lg shadow-sm border p-4">
       <audio
         ref={audioRef}
-        src={beat.audioUrl}
         preload="metadata"
         autoPlay={autoPlay}
       />
@@ -168,8 +231,14 @@ export default function AudioPlayer({
         </div>
       )}
 
-      {/* Error Message */}
-      {error && (
+      {/* Loading and Error Messages */}
+      {isLoading && (
+        <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded text-blue-700 text-sm flex items-center">
+          <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2"></div>
+          Loading audio...
+        </div>
+      )}
+      {error && !isLoading && (
         <div className="mb-3 p-2 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
           ⚠️ {error}
         </div>

@@ -4,7 +4,7 @@
  */
 
 import { Beat, Producer, DataAdapter } from '@/types/data';
-import { SanityAdapter } from './sanityAdapter';
+import { SanityAdapter } from './sanityAdapter.enhanced';
 import { Web3Adapter } from './web3Adapter';
 
 export class UnifiedDataProvider implements DataAdapter {

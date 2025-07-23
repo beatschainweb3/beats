@@ -1,6 +1,6 @@
 /**
- * Sanity CMS data adapter
- * Fetches and normalizes data from Sanity CMS
+ * Enhanced Sanity CMS data adapter
+ * Fetches and normalizes data from Sanity CMS with improved audio fallbacks
  */
 
 import { client, urlFor } from '@/lib/sanity-client';
@@ -70,6 +70,7 @@ export class SanityAdapter implements DataAdapter {
         key: b.key || 'C',
         price: b.price || 0.05,
         audioUrl: b.audioFile?.asset?.url || '',
+        sanityAudioUrl: b.audioFile?.asset?.url || '',
         coverImageUrl: b.coverImage ? urlFor(b.coverImage).url() : undefined,
         isNFT: false
       }));
@@ -181,6 +182,7 @@ export class SanityAdapter implements DataAdapter {
         key: b.key || 'C',
         price: b.price || 0.05,
         audioUrl: b.audioFile?.asset?.url || '',
+        sanityAudioUrl: b.audioFile?.asset?.url || '',
         coverImageUrl: b.coverImage ? urlFor(b.coverImage).url() : undefined,
         isNFT: false
       }));

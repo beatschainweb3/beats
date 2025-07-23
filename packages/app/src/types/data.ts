@@ -14,6 +14,7 @@ export interface Beat {
   key: string;
   price: number;
   audioUrl: string;
+  sanityAudioUrl?: string; // Fallback audio URL from Sanity
   coverImageUrl?: string;
   tags?: string[];
   isNFT: boolean;
