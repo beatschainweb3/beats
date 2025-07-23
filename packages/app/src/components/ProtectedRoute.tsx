@@ -114,6 +114,47 @@ export default function ProtectedRoute({
         </div>
       </div>
     )
+  } else if (requireWallet && wallet.isConnected && !isAuthenticated) {
+    // Wallet is connected but not authenticated
+    return fallback || (
+      <div>
+        {/* Hero Section */}
+        <div style={{
+          background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+          minHeight: '60vh',
+          display: 'flex',
+          alignItems: 'center',
+          color: 'white',
+          position: 'relative'
+        }}>
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.2)' }}></div>
+          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '4rem 2rem', position: 'relative', zIndex: 1, textAlign: 'center' }}>
+            <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>✍️</div>
+            <h1 style={{ fontSize: '3rem', fontWeight: 'bold', marginBottom: '1rem' }}>
+              Sign In to Continue
+            </h1>
+            <p style={{ fontSize: '1.25rem', opacity: 0.9, marginBottom: '2rem' }}>
+              Your wallet is connected. Please sign in to access this feature.
+            </p>
+            <button
+              onClick={signIn}
+              style={{
+                background: 'white',
+                color: '#1d4ed8',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '0.5rem',
+                fontWeight: 'bold',
+                fontSize: '1rem',
+                border: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              Sign In
+            </button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   // Check authentication

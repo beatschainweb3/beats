@@ -459,11 +459,13 @@ export default function BeatUpload() {
           />
         </div>
 
-        {/* Upload Progress */}
+        {/* Enhanced Upload Progress */}
         {uploading && (
           <div style={{ background: '#f0f9ff', padding: '1rem', borderRadius: '0.375rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-              <span style={{ fontSize: '0.875rem', color: '#1e40af' }}>Uploading...</span>
+              <span style={{ fontSize: '0.875rem', color: '#1e40af' }}>
+                Uploading {audioFile?.name}...
+              </span>
               <span style={{ fontSize: '0.875rem', color: '#1e40af' }}>{Math.round(progress)}%</span>
             </div>
             <div style={{ background: '#e0e7ff', height: '0.5rem', borderRadius: '0.25rem' }}>
@@ -477,6 +479,9 @@ export default function BeatUpload() {
                 }}
               />
             </div>
+            <p style={{ fontSize: '0.75rem', color: '#3b82f6', marginTop: '0.5rem' }}>
+              {progress < 100 ? 'Please wait while your beat is being uploaded...' : 'Processing your beat...'}
+            </p>
           </div>
         )}
 

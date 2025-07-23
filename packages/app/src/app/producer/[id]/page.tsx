@@ -218,7 +218,7 @@ export default function ProducerPage() {
                         </button>
                       </div>
                       
-                      {/* Enhanced Audio Player */}
+                      {/* Enhanced Audio Player with Advanced Error Handling */}
                       <div className="mt-4 p-3 bg-gray-100 rounded">
                         <div className="mb-2 text-xs text-gray-500">Preview (30s)</div>
                         {beat.audioUrl ? (
@@ -229,15 +229,35 @@ export default function ProducerPage() {
                             preload="metadata"
                             onError={(e) => {
                               console.warn('Audio failed to load:', beat.audioUrl);
-                              // Try to reload with a cache-busting parameter
+                              
+                              // Try to reload with cache-busting parameter
                               const audioElement = e.target as HTMLAudioElement;
                               if (audioElement && beat.audioUrl) {
+                                // First try: Add cache-busting parameter
                                 const cacheBuster = `?cb=${Date.now()}`;
                                 const newUrl = beat.audioUrl.includes('?') 
                                   ? `${beat.audioUrl}&cb=${Date.now()}` 
                                   : `${beat.audioUrl}${cacheBuster}`;
+                                
+                                console.log('Retrying with cache-busting URL:', newUrl);
                                 audioElement.src = newUrl;
                                 audioElement.load();
+                                
+                                // Add a second error handler for the retry attempt
+                                audioElement.onerror = () => {
+                                  console.warn('Retry failed, checking for alternative sources');
+                                  
+                                  // Try alternative IPFS gateway if it's an IPFS URL
+                                  if (beat.audioUrl?.includes('ipfs://')) {
+                                    const alternativeGateway = 'https://gateway.pinata.cloud/ipfs/';
+                                    const ipfsHash = beat.audioUrl.replace('ipfs://', '').split('?')[0];
+                                    const alternativeUrl = `${alternativeGateway}${ipfsHash}`;
+                                    
+                                    console.log('Trying alternative IPFS gateway:', alternativeUrl);
+                                    audioElement.src = alternativeUrl;
+                                    audioElement.load();
+                                  }
+                                };
                               }
                             }}
                           />

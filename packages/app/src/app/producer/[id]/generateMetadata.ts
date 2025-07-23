@@ -21,6 +21,11 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
       imageUrl = `${SITE_URL}/api/og?title=${title}&subtitle=${subtitle}&type=profile`
     }
     
+    // Ensure image URL is absolute
+    if (imageUrl && !imageUrl.startsWith('http')) {
+      imageUrl = `${SITE_URL}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`
+    }
+    
     // Generate metadata with proper social sharing
     return generateSocialMetadata({
       title: producer?.name ? `${producer.name} | BeatsChain Producer` : 'BeatsChain Producer',
