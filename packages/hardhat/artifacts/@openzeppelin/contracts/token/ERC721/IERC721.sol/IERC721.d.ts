@@ -306,24 +306,11 @@ export interface IERC721$Type {
 
 declare module "@nomicfoundation/hardhat-viem/types" {
   export function deployContract(
-    contractName: "IERC721",
-    constructorArgs?: [],
-    config?: DeployContractConfig
-  ): Promise<GetContractReturnType<IERC721$Type["abi"]>>;
-  export function deployContract(
     contractName: "@openzeppelin/contracts/token/ERC721/IERC721.sol:IERC721",
     constructorArgs?: [],
     config?: DeployContractConfig
   ): Promise<GetContractReturnType<IERC721$Type["abi"]>>;
 
-  export function sendDeploymentTransaction(
-    contractName: "IERC721",
-    constructorArgs?: [],
-    config?: SendDeploymentTransactionConfig
-  ): Promise<{
-    contract: GetContractReturnType<IERC721$Type["abi"]>;
-    deploymentTransaction: GetTransactionReturnType;
-  }>;
   export function sendDeploymentTransaction(
     contractName: "@openzeppelin/contracts/token/ERC721/IERC721.sol:IERC721",
     constructorArgs?: [],
@@ -333,11 +320,6 @@ declare module "@nomicfoundation/hardhat-viem/types" {
     deploymentTransaction: GetTransactionReturnType;
   }>;
 
-  export function getContractAt(
-    contractName: "IERC721",
-    address: Address,
-    config?: GetContractAtConfig
-  ): Promise<GetContractReturnType<IERC721$Type["abi"]>>;
   export function getContractAt(
     contractName: "@openzeppelin/contracts/token/ERC721/IERC721.sol:IERC721",
     address: Address,

@@ -65,7 +65,7 @@ const BeatNFTCreditSystemAbi = [
 const BeatNFTCreditSystemAddress = {
   1: '0x0000000000000000000000000000000000000000', // Mainnet - not deployed
   11155111: '0x8fa4e195010615d2376381e5de7a8099e2413d75', // Sepolia - deployed
-  31337: '0x0000000000000000000000000000000000000000' // Local - deploy needed
+  31337: '0x5fbdb2315678afecb367f032d93f642f64180aa3' // Local - deployed
 } as const
 
 export interface BeatNFTBalance {
@@ -111,8 +111,42 @@ export function useBeatNFT() {
       
       // Try to load from contract first
       try {
-        // Contract call would go here in production
-        // For now, we'll use localStorage
+        const { chain } = useAccount()
+        const chainId = chain?.id || 31337 // Default to local hardhat network
+        const contractAddress = BeatNFTCreditSystemAddress[chainId as keyof typeof BeatNFTCreditSystemAddress] as `0x${string}`
+        
+        if (contractAddress && contractAddress !== '0x0000000000000000000000000000000000000000') {
+          const { data: readContract } = useReadContract({
+            address: contractAddress,
+            abi: BeatNFTCreditSystemAbi,
+            functionName: 'getCreditBalance',
+            args: [address as `0x${string}`]
+          })
+          
+          const { data: hasProNFTData } = useReadContract({
+            address: contractAddress,
+            abi: BeatNFTCreditSystemAbi,
+            functionName: 'hasProNFT',
+            args: [address as `0x${string}`]
+          })
+          
+          if (readContract !== undefined) {
+            const credits = Number(readContract)
+            const hasProNFT = Boolean(hasProNFTData)
+            
+            // Update balance from contract data
+            const newBalance = {
+              ...balance,
+              credits: hasProNFT ? Infinity : credits,
+              hasProNFT
+            }
+            
+            // Store in localStorage for offline access
+            localStorage.setItem(`beatnft_balance_${address}`, JSON.stringify(newBalance))
+            setBalance(newBalance)
+            return // Exit early if contract data was loaded successfully
+          }
+        }
       } catch (contractError) {
         console.warn('Failed to load balance from contract:', contractError)
         // Continue with localStorage fallback
@@ -259,10 +293,14 @@ export function useBeatNFT() {
         return false
       }
       
-      // Check if contract is deployed
-      const contractAddress = BeatNFTCreditSystemAddress[11155111] as `0x${string}`
-      if (contractAddress === '0x0000000000000000000000000000000000000000') {
-        // Fallback to simulation for now
+      // Get contract address based on chain ID
+      const { chain } = useAccount()
+      const chainId = chain?.id || 31337 // Default to local hardhat network
+      const contractAddress = BeatNFTCreditSystemAddress[chainId as keyof typeof BeatNFTCreditSystemAddress] as `0x${string}`
+      
+      // If contract is not deployed on this chain, fallback to simulation
+      if (!contractAddress || contractAddress === '0x0000000000000000000000000000000000000000') {
+        console.warn(`Contract not deployed on chain ${chainId}, using simulation`)
         return await simulateCreditPurchase(amount, cost)
       }
       
@@ -350,10 +388,14 @@ export function useBeatNFT() {
       setLoading(true)
       setError(null)
       
-      // Check if contract is deployed
-      const contractAddress = BeatNFTCreditSystemAddress[11155111] as `0x${string}`
-      if (contractAddress === '0x0000000000000000000000000000000000000000') {
-        // Fallback to simulation for now
+      // Get contract address based on chain ID
+      const { chain } = useAccount()
+      const chainId = chain?.id || 31337 // Default to local hardhat network
+      const contractAddress = BeatNFTCreditSystemAddress[chainId as keyof typeof BeatNFTCreditSystemAddress] as `0x${string}`
+      
+      // If contract is not deployed on this chain, fallback to simulation
+      if (!contractAddress || contractAddress === '0x0000000000000000000000000000000000000000') {
+        console.warn(`Contract not deployed on chain ${chainId}, using simulation`)
         return await simulateProNFTUpgrade()
       }
       
