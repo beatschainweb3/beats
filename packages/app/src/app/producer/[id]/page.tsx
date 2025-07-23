@@ -212,22 +212,29 @@ export default function ProducerPage() {
                           href={`/beatnfts?beat=${beat.id}`}
                           className="bg-green-600 text-white px-4 py-2 rounded text-sm font-medium inline-block text-center no-underline"
                         >
-                          Buy Now
+                          {beat.isNFT ? 'Purchase BeatNFT™' : 'Buy Now'}
                         </a>
                       </div>
                       
                       {/* Simple Audio Player */}
-                      {beat.audioUrl && (
-                        <div className="mt-4 p-3 bg-gray-100 rounded">
-                          <div className="mb-2 text-xs text-gray-500">Preview (30s)</div>
+                      <div className="mt-4 p-3 bg-gray-100 rounded">
+                        <div className="mb-2 text-xs text-gray-500">Preview (30s)</div>
+                        {beat.audioUrl ? (
                           <audio
                             controls
                             src={beat.audioUrl}
                             className="w-full"
                             preload="metadata"
+                            onError={() => {
+                              console.warn('Audio failed to load:', beat.audioUrl);
+                            }}
                           />
-                        </div>
-                      )}
+                        ) : (
+                          <div className="text-center py-2 text-sm text-gray-500">
+                            Audio preview not available
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
