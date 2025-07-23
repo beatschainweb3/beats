@@ -107,14 +107,9 @@ export default function PurchaseModal({
   }
 
   const handlePurchase = async () => {
-    if (!user) {
-      toast.error('Please sign in to purchase beats')
-      return
-    }
-
-    // Check wallet connection for crypto payments
-    if (!isConnected) {
-      toast.error('Please connect your wallet to purchase beats')
+    // Check wallet connection for crypto payments only if using crypto
+    if (paymentMethod === 'crypto' && !isConnected) {
+      toast.error('Please connect your wallet to purchase with crypto')
       return
     }
 
@@ -343,7 +338,7 @@ export default function PurchaseModal({
                   </div>
 
                   {/* Crypto Wallet Connection Notice */}
-                  {!isConnected && (
+                  {paymentMethod === 'crypto' && !isConnected && (
                     <div className="mb-4 bg-gradient-to-r from-amber-50 to-yellow-50 p-4 rounded-lg border border-yellow-300">
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-yellow-600">🔗</span>
@@ -361,7 +356,7 @@ export default function PurchaseModal({
                   {/* Purchase Button */}
                   <button
                     onClick={handlePurchase}
-                    disabled={processing || !user || !isConnected}
+                    disabled={processing || (paymentMethod === 'crypto' && !isConnected)}
                     className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 px-6 rounded-lg hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-semibold text-lg shadow-lg hover:shadow-xl"
                   >
                     {processing ? (
@@ -369,9 +364,7 @@ export default function PurchaseModal({
                         <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                         Processing Payment...
                       </div>
-                    ) : !user ? (
-                      'Sign In to Purchase'
-                    ) : !isConnected ? (
+                    ) : (paymentMethod === 'crypto' && !isConnected) ? (
                       'Connect Wallet to Continue'
                     ) : (
                       `Purchase for ${formatPrice(selectedLicenseData.price)}`

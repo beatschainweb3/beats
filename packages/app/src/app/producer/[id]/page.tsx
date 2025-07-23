@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import SocialShare from '@/components/SocialShare'
 import { dataProvider } from '@/adapters/unifiedDataProvider'
+import { usePurchase } from '@/context/PurchaseContext'
 import { Beat, Producer } from '@/types/data'
 
 export default function ProducerPage() {
   const params = useParams()
   const producerId = params.id as string
+  const { selectBeatForPurchase } = usePurchase()
   const [selectedGenre, setSelectedGenre] = useState('all')
   const [producer, setProducer] = useState<Producer | null>(null)
   const [beats, setBeats] = useState<Beat[]>([])
@@ -208,12 +210,12 @@ export default function ProducerPage() {
                             ~R{Math.round(beat.price * 18000).toLocaleString()}
                           </div>
                         </div>
-                        <a 
-                          href={`/beatnfts?beat=${beat.id}`}
+                        <button 
+                          onClick={() => selectBeatForPurchase(beat)}
                           className="bg-green-600 text-white px-4 py-2 rounded text-sm font-medium inline-block text-center no-underline"
                         >
                           {beat.isNFT ? 'Purchase BeatNFT™' : 'Buy Now'}
-                        </a>
+                        </button>
                       </div>
                       
                       {/* Simple Audio Player */}
