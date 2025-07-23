@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import { generateSocialMetadata } from '@/lib/socialShare'
+import { generateSocialMetadata } from '@/lib/socialShare.enhanced'
 import { SanityAdapter } from '@/adapters/sanityAdapter'
 import { SITE_URL } from '@/utils/site'
 

@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { client } from '@/lib/sanity-client'
-import { generateSocialMetadata } from '@/lib/socialShare'
+import { generateSocialMetadata } from '@/lib/socialShare.enhanced'
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   try {
