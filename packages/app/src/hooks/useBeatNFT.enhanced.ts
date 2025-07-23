@@ -64,7 +64,7 @@ const BeatNFTCreditSystemAbi = [
 // Contract addresses
 const BeatNFTCreditSystemAddress = {
   1: '0x0000000000000000000000000000000000000000', // Mainnet - not deployed
-  11155111: '0x8fa4e195010615d2376381e5de7a8099e2413d75', // Sepolia - deployed
+  11155111: '0x950d8627eeb5361fc7f723fc6e23e223d751b23a', // Sepolia - deployed
   31337: '0x5fbdb2315678afecb367f032d93f642f64180aa3' // Local - deployed
 } as const
 
