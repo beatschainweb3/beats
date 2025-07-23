@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Beat } from '@/types/data'
 import { useUnifiedAuth } from '@/context/UnifiedAuthContext'
+import { usePurchase } from '@/context/PurchaseContext'
 import { toast } from 'react-hot-toast'
 
 interface SanityBeatCardProps {
@@ -17,6 +18,7 @@ export default function SanityBeatCard({ beat, onPurchase }: SanityBeatCardProps
   const [duration, setDuration] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
   const { user } = useUnifiedAuth()
+  const { selectBeatForPurchase } = usePurchase()
   const audioRef = useRef<HTMLAudioElement>(null)
   const progressRef = useRef<HTMLDivElement>(null)
 
@@ -83,6 +85,11 @@ export default function SanityBeatCard({ beat, onPurchase }: SanityBeatCardProps
       toast.error('Please sign in to purchase beats')
       return
     }
+    
+    // Use the PurchaseContext to show the modal
+    selectBeatForPurchase(beat)
+    
+    // Also call the onPurchase prop if provided (for backward compatibility)
     if (onPurchase) onPurchase(beat.id)
   }
 
