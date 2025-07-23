@@ -49,8 +49,18 @@ export default function BeatUpload() {
     e.preventDefault()
     
     // Validation
-    if (!isAuthenticated || !user) {
-      toast.error('Please sign in to upload beats')
+    if (!isConnected) {
+      toast.error('Please connect your wallet to upload beats')
+      return
+    }
+    
+    if (!isAuthenticated) {
+      toast.error('Please sign in with your wallet to upload beats')
+      return
+    }
+    
+    if (!user) {
+      toast.error('User profile not found. Please reconnect your wallet.')
       return
     }
     

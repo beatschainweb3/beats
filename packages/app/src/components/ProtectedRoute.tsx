@@ -109,7 +109,9 @@ export default function ProtectedRoute({
             <div style={{ background: 'rgba(255,255,255,0.1)', padding: '1.5rem', borderRadius: '1rem', marginBottom: '2rem', maxWidth: '500px', margin: '0 auto 2rem' }}>
               <p style={{ fontSize: '1rem' }}>Your wallet is your key to the decentralized music marketplace</p>
             </div>
-            <w3m-button />
+            <div style={{ marginBottom: '1rem' }}>
+              <w3m-button size="lg" label="Connect Wallet" />
+            </div>
           </div>
         </div>
       </div>
@@ -131,11 +133,14 @@ export default function ProtectedRoute({
           <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '4rem 2rem', position: 'relative', zIndex: 1, textAlign: 'center' }}>
             <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>✍️</div>
             <h1 style={{ fontSize: '3rem', fontWeight: 'bold', marginBottom: '1rem' }}>
-              Sign In to Continue
+              Sign Message with Wallet
             </h1>
             <p style={{ fontSize: '1.25rem', opacity: 0.9, marginBottom: '2rem' }}>
-              Your wallet is connected. Please sign in to access this feature.
+              Your wallet is connected. Please sign a message to verify your identity.
             </p>
+            <div style={{ background: 'rgba(255,255,255,0.1)', padding: '1.5rem', borderRadius: '1rem', marginBottom: '2rem', maxWidth: '500px', margin: '0 auto 2rem' }}>
+              <p style={{ fontSize: '1rem' }}>This signature doesn't cost any gas fees and keeps your account secure</p>
+            </div>
             <button
               onClick={signIn}
               style={{
@@ -146,10 +151,13 @@ export default function ProtectedRoute({
                 fontWeight: 'bold',
                 fontSize: '1rem',
                 border: 'none',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem'
               }}
             >
-              Sign In
+              <span>✍️</span> Sign Message
             </button>
           </div>
         </div>
