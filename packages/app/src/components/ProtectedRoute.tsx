@@ -3,6 +3,7 @@
 import { ReactNode } from 'react'
 import { useUnifiedAuth } from '@/context/UnifiedAuthContext'
 import { useUserAccessControl } from '@/hooks/useUserAccessControl'
+import SignInButton from './SignInButton'
 
 interface ProtectedRouteProps {
   children: ReactNode
@@ -21,7 +22,7 @@ export default function ProtectedRoute({
   fallback,
   requireWallet = false 
 }: ProtectedRouteProps) {
-  const { user, loading, isAuthenticated, hasPermission, hasRole, hasAnyRole, wallet } = useUnifiedAuth()
+  const { user, loading, isAuthenticated, hasPermission, hasRole, hasAnyRole, wallet, signIn } = useUnifiedAuth()
   const { isSuspended, suspensionReason, loading: suspensionLoading } = useUserAccessControl()
 
   if (loading || suspensionLoading) {
@@ -141,34 +142,7 @@ export default function ProtectedRoute({
             <div style={{ background: 'rgba(255,255,255,0.1)', padding: '1.5rem', borderRadius: '1rem', marginBottom: '2rem', maxWidth: '500px', margin: '0 auto 2rem' }}>
               <p style={{ fontSize: '1rem' }}>This signature doesn't cost any gas fees and keeps your account secure</p>
             </div>
-            <button
-              onClick={async () => {
-                try {
-                  await signIn()
-                  // If sign-in is successful, reload the page after a short delay
-                  setTimeout(() => {
-                    window.location.reload()
-                  }, 1000)
-                } catch (error) {
-                  console.error('Sign-in failed:', error)
-                }
-              }}
-              style={{
-                background: 'white',
-                color: '#1d4ed8',
-                padding: '0.75rem 1.5rem',
-                borderRadius: '0.5rem',
-                fontWeight: 'bold',
-                fontSize: '1rem',
-                border: 'none',
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.5rem'
-              }}
-            >
-              <span>✍️</span> Sign Message
-            </button>
+            <SignInButton signIn={signIn} />
           </div>
         </div>
       </div>
