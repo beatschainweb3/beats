@@ -12,6 +12,7 @@ import QuickActions from '@/components/QuickActions'
 import BeatManagementTable from '@/components/BeatManagementTable'
 import DashboardLayout from '@/components/DashboardLayout'
 import EnhancedBeatManagement from '@/components/EnhancedBeatManagement'
+import TransactionHistory from '@/components/TransactionHistory'
 
 interface ProducerStats {
   totalEarnings: number
@@ -48,6 +49,14 @@ function DashboardContent() {
       {/* Legacy Stats (keeping for compatibility) */}
       <div className="mb-8">
         <ProducerDashboardStats />
+      </div>
+      
+      {/* Transaction History Section */}
+      <div className="mb-8">
+        <h2 className="text-xl font-bold mb-4">Transaction History</h2>
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <TransactionHistory />
+        </div>
       </div>
       
       {/* Beat Analytics Section */}

@@ -41,6 +41,7 @@ export default function DashboardSidebar() {
       { icon: "📊", label: "Analytics", path: "/dashboard/analytics" },
       { icon: "💰", label: "Earnings", path: "/dashboard/earnings" },
       { icon: "🤝", label: "Negotiations", path: "/dashboard/negotiations" },
+      { icon: "⛓️", label: "Blockchain", path: "/dashboard/blockchain" },
     ]
   }
 
