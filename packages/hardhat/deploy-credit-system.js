@@ -7,6 +7,23 @@ async function main() {
   const publicClient = await viem.getPublicClient()
   const [deployer] = await viem.getWalletClients()
   
+  // Security check for default hardhat account
+  if (deployer.account.address.toLowerCase() === '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266') {
+    console.warn('\n⚠️  WARNING: You are deploying with the default Hardhat account!')
+    console.warn('⚠️  This account is publicly known and UNSAFE for production use!')
+    console.warn('⚠️  Only use this account for local testing. NEVER use it with real funds!')
+    
+    // Only continue if on localhost or hardhat network
+    const network = await publicClient.getChainId()
+    if (network !== 31337 && network !== 1337) {
+      console.error('❌ ABORTING: Refusing to deploy with default account on a public network!')
+      console.error('   Please use a secure, private key for deployment to public networks.')
+      console.error('   See docs/security/WALLET_SECURITY.md for more information.')
+      process.exit(1)
+    }
+    console.warn('⚠️  Continuing with deployment to local network only...\n')
+  }
+  
   console.log('Deploying with account:', deployer.account.address)
   
   const balance = await publicClient.getBalance({ address: deployer.account.address })

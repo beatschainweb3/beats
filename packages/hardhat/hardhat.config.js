@@ -8,7 +8,20 @@ const ETHERSCAN_API_KEY = process.env.NEXT_PUBLIC_ETHERSCAN_API_KEY || '';
 
 console.log('🔧 Config loaded:');
 console.log('   - Infura Key:', INFURA_KEY ? `${INFURA_KEY.slice(0, 8)}...` : 'NOT SET');
-console.log('   - Deployer Key:', DEPLOYER_KEY ? 'SET' : 'NOT SET');
+
+// SECURITY WARNING
+if (DEPLOYER_KEY) {
+  if (DEPLOYER_KEY === '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80') {
+    console.warn('⚠️  WARNING: You are using the default Hardhat private key!');
+    console.warn('⚠️  This key is publicly known and UNSAFE for production use!');
+    console.warn('⚠️  Only use this key for local testing. NEVER use it with real funds!');
+  } else {
+    console.log('   - Deployer Key: SET (custom key)');
+  }
+} else {
+  console.log('   - Deployer Key: NOT SET');
+}
+
 console.log('   - Etherscan Key:', ETHERSCAN_API_KEY ? 'SET' : 'NOT SET');
 
 module.exports = {
