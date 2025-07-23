@@ -2,6 +2,7 @@ import React, { PropsWithChildren } from 'react'
 import { Header } from './Header'
 import { Footer } from './Footer'
 import { ToastContainer } from 'react-toastify'
+import BlockchainEventListener from './BlockchainEventListener'
 import 'react-toastify/dist/ReactToastify.css'
 
 export function Layout(props: PropsWithChildren) {
@@ -12,6 +13,8 @@ export function Layout(props: PropsWithChildren) {
       <main className='grow px-4 container max-w-full mx-auto'>{props.children}</main>
 
       <Footer />
+      
+      <BlockchainEventListener />
       
       <ToastContainer
         position="top-right"

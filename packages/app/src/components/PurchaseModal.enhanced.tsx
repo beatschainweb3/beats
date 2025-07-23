@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { usePayments } from '@/hooks/usePayments'
+import { usePayments } from '@/hooks/usePayments.enhanced'
+import { useNotifications } from '@/context/NotificationsEnhanced'
 import { useUnifiedAuth } from '@/context/UnifiedAuthContext'
 import { toast } from 'react-toastify'
 import { Beat } from '@/types/data'
@@ -18,6 +19,7 @@ export default function PurchaseModal({ isOpen, onClose, beat }: PurchaseModalPr
   const [purchaseError, setPurchaseError] = useState<string | null>(null)
   const { purchaseWithCrypto, processing, error } = usePayments()
   const { user, isAuthenticated, wallet, connectWallet } = useUnifiedAuth()
+  const { addNotification } = useNotifications()
 
   if (!isOpen) return null
 
@@ -70,6 +72,25 @@ export default function PurchaseModal({ isOpen, onClose, beat }: PurchaseModalPr
         const result = await purchaseWithCrypto(purchaseData)
         if (result?.success) {
           toast.success(`🎵 Successfully purchased "${beat.title}" with ${licenseType} license!`)
+          
+          // Add notification
+          addNotification(
+            `You purchased "${beat.title}" with ${licenseType} license`,
+            {
+              type: 'purchase',
+              beatId: beat.id,
+              beatTitle: beat.title,
+              amount: licenseOptions[licenseType].price,
+              currency: 'ETH',
+              transactionHash: result.transactionHash,
+              metadata: {
+                licenseType,
+                producerId: beat.producerId,
+                producerName: beat.producerName
+              }
+            }
+          )
+          
           onClose()
           
           // Store purchase in local storage for demo
