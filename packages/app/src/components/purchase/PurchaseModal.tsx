@@ -109,7 +109,7 @@ export default function PurchaseModal({
   const handlePurchase = async () => {
     // Check wallet connection for crypto payments only if using crypto
     if (paymentMethod === 'crypto' && !isConnected) {
-      toast.error('Please connect your wallet to purchase with crypto')
+      toast.error('Please connect your wallet to purchase with crypto', { toastId: 'wallet-required' })
       return
     }
 
@@ -124,10 +124,10 @@ export default function PurchaseModal({
       // or smart contracts for crypto
       
       onPurchaseComplete(beat.id, selectedLicense)
-      toast.success(`Beat purchased successfully with ${selectedLicenseData.name}!`)
+      toast.success(`Beat purchased successfully with ${selectedLicenseData.name}!`, { toastId: `purchase-success-${beat.id}` })
       
     } catch (error) {
-      toast.error('Purchase failed. Please try again.')
+      toast.error('Purchase failed. Please try again.', { toastId: `purchase-error-${beat.id}` })
     } finally {
       setProcessing(false)
     }

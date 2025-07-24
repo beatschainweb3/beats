@@ -43,7 +43,7 @@ export default function BeatCard({ beat }: BeatCardProps) {
       if (!canPreviewFullBeat && previewDuration > 0 && audio.currentTime >= previewDuration) {
         audio.pause()
         setIsPlaying(false)
-        toast.info(`Preview limited to ${previewDuration}s. ${previewReason}`)
+        toast.info(`Preview limited to ${previewDuration}s. ${previewReason}`, { toastId: `preview-limit-${beat.id}` })
       }
     }
     
@@ -81,7 +81,7 @@ export default function BeatCard({ beat }: BeatCardProps) {
       }
     } catch (error) {
       console.error('Audio play error:', error)
-      toast.error('Unable to play audio')
+      toast.error('Unable to play audio', { toastId: `audio-error-${beat.id}` })
     }
   }
 
@@ -96,7 +96,7 @@ export default function BeatCard({ beat }: BeatCardProps) {
 
   const handlePurchase = () => {
     if (!user) {
-      toast.error('Please sign in to purchase beats')
+      toast.error('Please sign in to purchase beats', { toastId: 'auth-required' })
       return
     }
     setShowPurchaseModal(true)
@@ -106,16 +106,17 @@ export default function BeatCard({ beat }: BeatCardProps) {
     const beatNftId = beat.beatNftId || beat.id // ✅ BeatNFT™ compatibility
     console.log(`Purchase completed: BeatNFT™ ${beatNftId} with ${licenseType} license`)
     setShowPurchaseModal(false)
-    toast.success('BeatNFT™ purchase successful!')
+    toast.success('BeatNFT™ purchase successful!', { toastId: `purchase-complete-${beatId}` })
   }
 
   const handleLike = () => {
     if (!user) {
-      toast.error('Please sign in to like beats')
+      toast.error('Please sign in to like beats', { toastId: 'auth-required' })
       return
     }
-    setIsLiked(!isLiked)
-    toast.success(isLiked ? 'Removed from favorites' : 'Added to favorites')
+    const newLikedState = !isLiked
+    setIsLiked(newLikedState)
+    toast.success(newLikedState ? 'Added to favorites' : 'Removed from favorites', { toastId: `like-${beat.id}` })
   }
 
   const formatTime = (time: number) => {
@@ -259,7 +260,7 @@ export default function BeatCard({ beat }: BeatCardProps) {
             onError={() => {
               console.warn('Audio failed to load:', beat.audioUrl)
               setIsLoading(false)
-              toast.error('Audio preview not available')
+              toast.error('Audio preview not available', { toastId: `audio-load-error-${beat.id}` })
             }}
           />
         )}
@@ -279,7 +280,7 @@ export default function BeatCard({ beat }: BeatCardProps) {
         isOpen={showNegotiationModal}
         onClose={() => setShowNegotiationModal(false)}
         onSuccess={() => {
-          toast.success('License negotiation submitted!')
+          toast.success('License negotiation submitted!', { toastId: `negotiation-${beat.id}` })
           setShowNegotiationModal(false)
         }}
       />
