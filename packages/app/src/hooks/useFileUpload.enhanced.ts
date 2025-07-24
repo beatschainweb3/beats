@@ -82,6 +82,7 @@ export function useFileUpload() {
           throw new Error('File too large for storage. Please use a smaller file or upgrade to Pro NFT.')
         }
       }
+      }
       
       setProgress(100)
       setUploading(false)

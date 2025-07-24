@@ -4,9 +4,17 @@ let pinata: PinataSDK | null = null
 
 function getPinataClient() {
   if (!pinata && typeof window !== 'undefined') {
+    const jwt = process.env.NEXT_PUBLIC_PINATA_JWT || process.env.PINATA_JWT
+    const gateway = process.env.NEXT_PUBLIC_IPFS_GATEWAY
+    
+    if (!jwt || !gateway) {
+      console.warn('Pinata credentials not available on client side')
+      return null
+    }
+    
     pinata = new PinataSDK({
-      pinataJwt: process.env.PINATA_JWT!,
-      pinataGateway: process.env.NEXT_PUBLIC_IPFS_GATEWAY!
+      pinataJwt: jwt,
+      pinataGateway: gateway
     })
   }
   return pinata
