@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Beat } from '@/types'
 import { useWeb3Auth } from '@/hooks/useWeb3Auth'
-import { toast } from 'react-toastify'
+import { useToast } from '@/hooks/useToast'
 import { useAccount } from 'wagmi'
 import { getEthExchangeRate, getCurrencySymbol } from '@/utils/currency'
 
@@ -40,6 +40,7 @@ export default function PurchaseModal({
   const [paymentMethod, setPaymentMethod] = useState('crypto')
   const [exchangeRate, setExchangeRate] = useState<number | null>(null)
   const [currency] = useState('ZAR')
+  const { success, error } = useToast()
   
   // Fetch exchange rate on component mount
   useEffect(() => {
@@ -109,7 +110,10 @@ export default function PurchaseModal({
   const handlePurchase = async () => {
     // Check wallet connection for crypto payments only if using crypto
     if (paymentMethod === 'crypto' && !isConnected) {
-      toast.error('Please connect your wallet to purchase with crypto', { toastId: 'wallet-required' })
+      error('Please connect your wallet to purchase with crypto', { 
+        throttleKey: 'wallet-required',
+        throttleMs: 10000
+      })
       return
     }
 
@@ -124,10 +128,16 @@ export default function PurchaseModal({
       // or smart contracts for crypto
       
       onPurchaseComplete(beat.id, selectedLicense)
-      toast.success(`Beat purchased successfully with ${selectedLicenseData.name}!`, { toastId: `purchase-success-${beat.id}` })
+      success(`Beat purchased successfully with ${selectedLicenseData.name}!`, { 
+        throttleKey: `purchase-success-${beat.id}`,
+        throttleMs: 5000
+      })
       
-    } catch (error) {
-      toast.error('Purchase failed. Please try again.', { toastId: `purchase-error-${beat.id}` })
+    } catch (purchaseError) {
+      error('Purchase failed. Please try again.', { 
+        throttleKey: `purchase-error-${beat.id}`,
+        throttleMs: 5000
+      })
     } finally {
       setProcessing(false)
     }

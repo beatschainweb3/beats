@@ -11,7 +11,7 @@ import { useUnifiedAuth } from '@/context/UnifiedAuthContext'
 import { useContentCreator } from '@/hooks/useContentCreator'
 import { useCreatorPreview } from '@/hooks/useCreatorPreview'
 import { normalizeImageSource } from '@/utils/imageOptimization'
-import { toast } from 'react-toastify'
+import { useToast } from '@/hooks/useToast'
 
 interface BeatCardProps {
   beat: Beat
@@ -28,8 +28,10 @@ export default function BeatCard({ beat }: BeatCardProps) {
   const { user } = useUnifiedAuth()
   const { isCreator } = useContentCreator()
   const { canPreviewFullBeat, previewReason, previewDuration } = useCreatorPreview()
+  const { success, error, info } = useToast()
   const audioRef = useRef<HTMLAudioElement>(null)
   const progressRef = useRef<HTMLDivElement>(null)
+  const previewLimitShown = useRef(false)
 
   // Audio player functionality with creator preview limits
   useEffect(() => {
@@ -40,10 +42,14 @@ export default function BeatCard({ beat }: BeatCardProps) {
       setCurrentTime(audio.currentTime)
       
       // Limit preview for non-qualified creators
-      if (!canPreviewFullBeat && previewDuration > 0 && audio.currentTime >= previewDuration) {
+      if (!canPreviewFullBeat && previewDuration > 0 && audio.currentTime >= previewDuration && !previewLimitShown.current) {
         audio.pause()
         setIsPlaying(false)
-        toast.info(`Preview limited to ${previewDuration}s. ${previewReason}`, { toastId: `preview-limit-${beat.id}` })
+        previewLimitShown.current = true
+        info(`Preview limited to ${previewDuration}s. ${previewReason}`, { 
+          throttleKey: `preview-limit-${beat.id}`,
+          throttleMs: 30000 // 30 second throttle
+        })
       }
     }
     
@@ -79,9 +85,12 @@ export default function BeatCard({ beat }: BeatCardProps) {
         await audio.play()
         setIsPlaying(true)
       }
-    } catch (error) {
-      console.error('Audio play error:', error)
-      toast.error('Unable to play audio', { toastId: `audio-error-${beat.id}` })
+    } catch (audioError) {
+      console.error('Audio play error:', audioError)
+      error('Unable to play audio', { 
+        throttleKey: `audio-error-${beat.id}`,
+        throttleMs: 5000
+      })
     }
   }
 
@@ -96,7 +105,10 @@ export default function BeatCard({ beat }: BeatCardProps) {
 
   const handlePurchase = () => {
     if (!user) {
-      toast.error('Please sign in to purchase beats', { toastId: 'auth-required' })
+      error('Please sign in to purchase beats', { 
+        throttleKey: 'auth-required',
+        throttleMs: 10000
+      })
       return
     }
     setShowPurchaseModal(true)
@@ -111,12 +123,18 @@ export default function BeatCard({ beat }: BeatCardProps) {
 
   const handleLike = () => {
     if (!user) {
-      toast.error('Please sign in to like beats', { toastId: 'auth-required' })
+      error('Please sign in to like beats', { 
+        throttleKey: 'auth-required',
+        throttleMs: 10000
+      })
       return
     }
     const newLikedState = !isLiked
     setIsLiked(newLikedState)
-    toast.success(newLikedState ? 'Added to favorites' : 'Removed from favorites', { toastId: `like-${beat.id}` })
+    success(newLikedState ? 'Added to favorites' : 'Removed from favorites', { 
+      throttleKey: `like-${beat.id}`,
+      throttleMs: 2000
+    })
   }
 
   const formatTime = (time: number) => {

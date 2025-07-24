@@ -10,7 +10,7 @@ import BuyBeatNFTModal from '@/components/BuyBeatNFTModal'
 import LicenseSelector from '@/components/LicenseSelector'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import { BackToDashboard } from '@/components/BackToDashboard'
-import { toast } from 'react-toastify'
+import { useToast } from '@/hooks/useToast'
 
 export default function BeatUpload() {
   const [formData, setFormData] = useState({
@@ -34,6 +34,7 @@ export default function BeatUpload() {
   const { uploadBeatAudio, uploadCoverImage, uploading, progress, error, currentOperation } = useFileUpload()
   const { refreshBeats } = useWeb3Beats()
   const { balance, canUpload, useCredits, isConnected } = useBeatNFT()
+  const { success, error: showError } = useToast()
 
   const { getRootProps: getAudioProps, getInputProps: getAudioInputProps } = useDropzone({
     accept: { 'audio/*': ['.mp3', '.wav', '.m4a'] },
@@ -62,32 +63,32 @@ export default function BeatUpload() {
     
     // Validation
     if (!isConnected) {
-      toast.error('Please connect your wallet to upload beats')
+      error('Please connect your wallet to upload beats', { throttleKey: 'wallet-required', throttleMs: 10000 })
       return
     }
     
     if (!isAuthenticated && user?.role !== 'admin' && user?.role !== 'super_admin') {
-      toast.error('Please sign in with your wallet to upload beats')
+      error('Please sign in with your wallet to upload beats', { throttleKey: 'auth-required', throttleMs: 10000 })
       return
     }
     
     if (!user) {
-      toast.error('User profile not found. Please reconnect your wallet.')
+      error('User profile not found. Please reconnect your wallet.', { throttleKey: 'user-profile-error', throttleMs: 10000 })
       return
     }
     
     if (!audioFile) {
-      toast.error('Please select an audio file')
+      error('Please select an audio file', { throttleKey: 'audio-file-required', throttleMs: 5000 })
       return
     }
     
     if (!formData.title.trim()) {
-      toast.error('Please enter a title for your beat')
+      error('Please enter a title for your beat', { throttleKey: 'title-required', throttleMs: 5000 })
       return
     }
     
     if (formData.price <= 0) {
-      toast.error('Please enter a valid price')
+      error('Please enter a valid price', { throttleKey: 'price-required', throttleMs: 5000 })
       return
     }
 
@@ -98,7 +99,7 @@ export default function BeatUpload() {
     console.log('File size:', (audioFile.size / (1024 * 1024)).toFixed(1), 'MB')
     
     if (!uploadCheck.allowed) {
-      toast.error(uploadCheck.reason || 'Insufficient credits')
+      showError(uploadCheck.reason || 'Insufficient credits', { throttleKey: 'upload-check-failed', throttleMs: 5000 })
       setShowBuyModal(true)
       return
     }
@@ -176,7 +177,10 @@ export default function BeatUpload() {
       const uploadCheck = canUpload(audioFile)
       if (uploadCheck.cost > 0) {
         await useCredits(uploadCheck.cost)
-        toast.success(`✅ Used ${uploadCheck.cost} BeatNFT credit${uploadCheck.cost > 1 ? 's' : ''} for ${uploadCheck.fileSize} file!`)
+        success(`✅ Used ${uploadCheck.cost} BeatNFT credit${uploadCheck.cost > 1 ? 's' : ''} for ${uploadCheck.fileSize} file!`, {
+          throttleKey: `credits-used-${beatId}`,
+          throttleMs: 3000
+        })
       }
       
       // Refresh beats list
@@ -197,7 +201,10 @@ export default function BeatUpload() {
       setCoverFile(null)
       setSelectedLicense('BASIC')
 
-      toast.success('🎵 Beat uploaded successfully! Your beat is now live on the marketplace.', { toastId: `upload-success-${beatId}` })
+      success('🎵 Beat uploaded successfully! Your beat is now live on the marketplace.', { 
+        throttleKey: `upload-success-${beatId}`,
+        throttleMs: 5000
+      })
       
       // Redirect to dashboard after a short delay
       setTimeout(() => {
@@ -205,7 +212,10 @@ export default function BeatUpload() {
       }, 2000)
     } catch (err: any) {
       console.error('Upload failed:', err)
-      toast.error(`Upload failed: ${err.message || 'Please try again'}`, { toastId: `upload-error-${Date.now()}` })
+      showError(`Upload failed: ${err.message || 'Please try again'}`, { 
+        throttleKey: `upload-error-${Date.now()}`,
+        throttleMs: 5000
+      })
     } finally {
       setSubmitting(false)
     }
