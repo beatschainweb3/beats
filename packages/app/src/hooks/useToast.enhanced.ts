@@ -2,6 +2,7 @@
 
 import { useCallback, useRef } from 'react'
 import { enhancedToastManager } from '@/utils/toastManager.enhanced'
+import { performanceMonitor } from '@/utils/performanceMonitor'
 import { ToastOptions } from 'react-toastify'
 
 interface EnhancedToastOptions extends ToastOptions {
@@ -25,7 +26,16 @@ export function useEnhancedToast() {
       shownOnce.current.add(onceKey)
     }
     
-    return enhancedToastManager.show(message, { throttleKey, ...restOptions })
+    const result = enhancedToastManager.show(message, { throttleKey, ...restOptions })
+    
+    // Track toast usage
+    if (result) {
+      performanceMonitor.track('toast_shown', 1, 'toast')
+    } else {
+      performanceMonitor.track('toast_throttled', 1, 'toast')
+    }
+    
+    return result
   }, [])
   
   const success = useCallback((message: string, options: EnhancedToastOptions = {}) => {
