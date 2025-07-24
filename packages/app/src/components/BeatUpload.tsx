@@ -94,6 +94,9 @@ export default function BeatUpload() {
     // Check BeatNFT credits with file size
     const uploadCheck = canUpload(audioFile)
     
+    console.log('Upload check result:', uploadCheck)
+    console.log('File size:', (audioFile.size / (1024 * 1024)).toFixed(1), 'MB')
+    
     if (!uploadCheck.allowed) {
       toast.error(uploadCheck.reason || 'Insufficient credits')
       setShowBuyModal(true)
@@ -194,7 +197,7 @@ export default function BeatUpload() {
       setCoverFile(null)
       setSelectedLicense('BASIC')
 
-      toast.success('🎵 Beat uploaded successfully! Your beat is now live on the marketplace.')
+      toast.success('🎵 Beat uploaded successfully! Your beat is now live on the marketplace.', { toastId: `upload-success-${beatId}` })
       
       // Redirect to dashboard after a short delay
       setTimeout(() => {
@@ -202,7 +205,7 @@ export default function BeatUpload() {
       }, 2000)
     } catch (err: any) {
       console.error('Upload failed:', err)
-      toast.error(`Upload failed: ${err.message || 'Please try again'}`)
+      toast.error(`Upload failed: ${err.message || 'Please try again'}`, { toastId: `upload-error-${Date.now()}` })
     } finally {
       setSubmitting(false)
     }

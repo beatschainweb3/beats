@@ -23,24 +23,30 @@ export function useFileUpload() {
     setCurrentOperation('Preparing audio file')
     
     try {
-      // First try IPFS upload if available
-      try {
-        setCurrentOperation('Uploading to IPFS')
-        setProgress(10)
-        
-        const ipfsResult = await uploadFile(file, `beats/${beatId}`)
-        if (ipfsResult) {
-          // Store IPFS URL in localStorage as backup
-          const audioKey = `beat_audio_${beatId}`
-          localStorage.setItem(audioKey, ipfsResult.url)
+      // Check if IPFS is configured
+      const hasIPFSConfig = process.env.PINATA_JWT && process.env.NEXT_PUBLIC_IPFS_GATEWAY
+      
+      if (hasIPFSConfig) {
+        try {
+          setCurrentOperation('Uploading to IPFS')
+          setProgress(10)
           
-          setProgress(100)
-          setUploading(false)
-          return ipfsResult.url
+          const ipfsResult = await uploadFile(file, `beats/${beatId}`)
+          if (ipfsResult) {
+            // Store IPFS URL in localStorage as backup
+            const audioKey = `beat_audio_${beatId}`
+            localStorage.setItem(audioKey, ipfsResult.url)
+            
+            setProgress(100)
+            setUploading(false)
+            return ipfsResult.url
+          }
+        } catch (ipfsError) {
+          console.warn('IPFS upload failed, falling back to local storage:', ipfsError)
+          // Continue with fallback
         }
-      } catch (ipfsError) {
-        console.warn('IPFS upload failed, falling back to local storage:', ipfsError)
-        // Continue with fallback
+      } else {
+        console.warn('IPFS not configured, using localStorage fallback')
       }
       
       // Fallback to base64 storage
