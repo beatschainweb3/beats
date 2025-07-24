@@ -246,6 +246,20 @@ function AdminDashboard() {
           </div>
         </LinkComponent>
 
+        <LinkComponent href="/admin/blockchain" className="block">
+          <div className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-4">
+              <div className="bg-purple-100 p-3 rounded-full">
+                <span className="text-purple-600 text-xl">⛓️</span>
+              </div>
+              <div>
+                <h3 className="font-semibold">Blockchain</h3>
+                <p className="text-sm text-gray-600">Smart contract management</p>
+              </div>
+            </div>
+          </div>
+        </LinkComponent>
+
         <LinkComponent href="/admin/settings" className="block">
           <div className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow">
             <div className="flex items-center gap-4">

@@ -1110,6 +1110,46 @@
       "artifacts": [
         "Message"
       ]
+    },
+    "/workspaces/beats/packages/hardhat/contracts/BeatNFTCreditSystemV2.sol": {
+      "lastModificationDate": 1753345064019,
+      "contentHash": "870579a7c6320fee1760784334d4d10e",
+      "sourceName": "contracts/BeatNFTCreditSystemV2.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC721/ERC721.sol",
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "BeatNFTCreditSystemV2"
+      ]
     }
   }
 }

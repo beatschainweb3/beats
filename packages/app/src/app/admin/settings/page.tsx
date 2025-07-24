@@ -27,6 +27,7 @@ function AdminSettingsContent() {
 
   const tabs = [
     { id: 'platform', name: 'Platform Settings', icon: '⚙️' },
+    { id: 'blockchain', name: 'Blockchain', icon: '⛓️' },
     { id: 'site', name: 'Site Settings', icon: '🌐' },
     { id: 'cms', name: 'CMS', icon: '📝' }
   ]
@@ -287,6 +288,110 @@ function AdminSettingsContent() {
               </label>
             </div>
 
+              </div>
+            )}
+
+            {activeTab === 'blockchain' && (
+              <div className="space-y-6">
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h3 className="font-medium text-blue-800 mb-2">Smart Contract V2 Status</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="text-gray-600">Contract Address:</p>
+                      <p className="font-mono bg-white p-2 rounded text-xs break-all">0xcf7f010edb33f5c8582e8f97e20ef76be8b83311</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Network:</p>
+                      <p className="font-medium">Sepolia Testnet</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Max File Size (MB)</label>
+                  <input
+                    type="number"
+                    value={100}
+                    disabled
+                    className="w-full px-3 py-2 border rounded-md bg-gray-100"
+                  />
+                  <p className="text-sm text-gray-600 mt-1">Maximum file size enforced by smart contract (V2)</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Storage Per Credit (MB)</label>
+                  <input
+                    type="number"
+                    value={50}
+                    disabled
+                    className="w-full px-3 py-2 border rounded-md bg-gray-100"
+                  />
+                  <p className="text-sm text-gray-600 mt-1">Storage allocation per credit (V2 feature)</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Pro NFT Price (ETH)</label>
+                  <input
+                    type="number"
+                    value={0.1}
+                    disabled
+                    className="w-full px-3 py-2 border rounded-md bg-gray-100"
+                  />
+                  <p className="text-sm text-gray-600 mt-1">Price for Pro NFT upgrade (unlimited storage)</p>
+                </div>
+
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <h4 className="font-medium text-green-800 mb-2">Credit Packages</h4>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div className="bg-white p-2 rounded">
+                      <span className="font-medium">10 credits:</span> 0.01 ETH
+                    </div>
+                    <div className="bg-white p-2 rounded">
+                      <span className="font-medium">25 credits:</span> 0.02 ETH
+                    </div>
+                    <div className="bg-white p-2 rounded">
+                      <span className="font-medium">50 credits:</span> 0.035 ETH
+                    </div>
+                    <div className="bg-white p-2 rounded">
+                      <span className="font-medium">100 credits:</span> 0.06 ETH
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-purple-50 p-4 rounded-lg">
+                  <h4 className="font-medium text-purple-800 mb-2">Size-Based Pricing</h4>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div className="bg-white p-2 rounded">
+                      <span className="font-medium">0-10MB:</span> 1 credit
+                    </div>
+                    <div className="bg-white p-2 rounded">
+                      <span className="font-medium">10-25MB:</span> 2 credits
+                    </div>
+                    <div className="bg-white p-2 rounded">
+                      <span className="font-medium">25-50MB:</span> 3 credits
+                    </div>
+                    <div className="bg-white p-2 rounded">
+                      <span className="font-medium">50-100MB:</span> 5 credits
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  <a 
+                    href="https://sepolia.etherscan.io/address/0xcf7f010edb33f5c8582e8f97e20ef76be8b83311" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 text-center"
+                  >
+                    View on Etherscan
+                  </a>
+                  <LinkComponent 
+                    href="/admin/blockchain"
+                    className="flex-1 bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 text-center"
+                  >
+                    Blockchain Dashboard
+                  </LinkComponent>
+                </div>
               </div>
             )}
 
