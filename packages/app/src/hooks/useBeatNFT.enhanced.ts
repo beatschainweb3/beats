@@ -192,35 +192,44 @@ export function useBeatNFT() {
     }
   }
 
-  const canUpload = (fileType: string): { allowed: boolean; cost: number; reason?: string } => {
-    // Default to MP3 cost if file type is unknown
-    const costs = {
-      'mp3': 1,
-      'wav': 2,
-      'zip': 3,
-      'm4a': 1,
-      'aiff': 2,
-      'flac': 2,
-      'ogg': 1
+  const canUpload = (file: File | { size: number; name: string }): { allowed: boolean; cost: number; reason?: string; fileSize?: string } => {
+    const fileSize = file.size
+    const fileName = 'name' in file ? file.name : ''
+    const fileType = fileName.split('.').pop()?.toLowerCase() || 'mp3'
+    const sizeMB = fileSize / (1024 * 1024)
+    
+    // Check file size limit (100MB max)
+    if (sizeMB > 100) {
+      return {
+        allowed: false,
+        cost: 0,
+        fileSize: `${sizeMB.toFixed(1)}MB`,
+        reason: 'File size exceeds 100MB limit'
+      }
     }
     
-    const cost = costs[fileType.toLowerCase() as keyof typeof costs] || 1
+    // Calculate credits based on file size
+    let cost = 1 // Base cost
+    if (sizeMB > 50) cost = 5
+    else if (sizeMB > 25) cost = 3
+    else if (sizeMB > 10) cost = 2
     
-    // Pro users can upload anything
+    // Pro users can upload anything under 100MB
     if (balance.hasProNFT) {
-      return { allowed: true, cost: 0 }
+      return { allowed: true, cost: 0, fileSize: `${sizeMB.toFixed(1)}MB` }
     }
     
     // Check if user has enough credits
     if (balance.credits >= cost) {
-      return { allowed: true, cost }
+      return { allowed: true, cost, fileSize: `${sizeMB.toFixed(1)}MB` }
     }
     
     // Not enough credits
     return { 
       allowed: false, 
-      cost, 
-      reason: `Need ${cost} BeatNFT credit${cost !== 1 ? 's' : ''}. You have ${balance.credits}.`
+      cost,
+      fileSize: `${sizeMB.toFixed(1)}MB`,
+      reason: `Need ${cost} BeatNFT credit${cost !== 1 ? 's' : ''}. You have ${balance.credits}. (${sizeMB.toFixed(1)}MB file)`
     }
   }
 

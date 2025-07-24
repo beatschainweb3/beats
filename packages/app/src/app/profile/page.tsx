@@ -5,6 +5,7 @@ import { useWeb3Profile } from '@/hooks/useWeb3Profile'
 import { BackToDashboard } from '@/components/BackToDashboard'
 import { toast } from 'react-toastify'
 import { useAccount } from 'wagmi'
+import { useRouter } from 'next/navigation'
 
 export default function ProfilePage() {
   const { 
@@ -20,6 +21,7 @@ export default function ProfilePage() {
     isConnected
   } = useWeb3Profile()
   const { address } = useAccount()
+  const router = useRouter()
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [formData, setFormData] = useState({
@@ -124,9 +126,18 @@ export default function ProfilePage() {
       })
       
       if (success) {
-        toast.success('Profile updated successfully!')
+        toast.success('Profile updated successfully!', { toastId: 'profile-save' })
+        
+        // Route based on user role
+        setTimeout(() => {
+          if (profile?.role === 'producer') {
+            router.push('/dashboard')
+          } else {
+            router.push('/profile')
+          }
+        }, 1500)
       } else {
-        toast.error('Failed to update profile')
+        toast.error('Failed to update profile', { toastId: 'profile-error' })
       }
     } catch (error: any) {
       console.error('Error updating profile:', error)
@@ -403,10 +414,9 @@ export default function ProfilePage() {
                     if (e.target.checked) {
                       const success = await updateProfile({ role: 'user' })
                       if (success) {
-                        toast.success('Switched to Music Fan account!')
-                        // Use router.refresh() instead of window.location.reload()
+                        toast.success('Switched to Music Fan account!', { toastId: 'role-change' })
                         setTimeout(() => {
-                          window.location.href = window.location.href
+                          router.refresh()
                         }, 1000)
                       }
                     }
@@ -436,11 +446,10 @@ export default function ProfilePage() {
                     if (e.target.checked) {
                       const success = await updateProfile({ role: 'producer' })
                       if (success) {
-                        toast.success('Switched to Producer account! You can now access the dashboard.')
-                        // Use router.refresh() instead of window.location.reload()
+                        toast.success('Switched to Producer account! Redirecting to dashboard...', { toastId: 'role-change' })
                         setTimeout(() => {
-                          window.location.href = window.location.href
-                        }, 1000)
+                          router.push('/dashboard')
+                        }, 1500)
                       }
                     }
                   }}

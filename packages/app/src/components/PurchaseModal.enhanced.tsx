@@ -115,31 +115,31 @@ export default function PurchaseModal({ isOpen, onClose, beat }: PurchaseModalPr
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4">
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 sticky top-0 z-10">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-bold">Purchase Beat</h2>
+            <h2 className="text-lg font-bold">Purchase Beat</h2>
             <button
               onClick={onClose}
-              className="text-white hover:text-gray-200 text-xl"
+              className="text-white hover:text-gray-200 text-2xl w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/20"
             >
               ×
             </button>
           </div>
         </div>
 
-        <div className="p-6">
+        <div className="p-4">
           {/* Beat Info */}
-          <div className="flex items-center gap-4 mb-6">
+          <div className="flex items-center gap-3 mb-4">
             {beat.coverImageUrl ? (
               <img 
                 src={beat.coverImageUrl} 
                 alt={beat.title} 
-                className="w-16 h-16 rounded object-cover"
+                className="w-12 h-12 rounded object-cover"
               />
             ) : (
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-400 to-purple-400 rounded flex items-center justify-center text-white text-2xl">
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-purple-400 rounded flex items-center justify-center text-white text-xl">
                 🎵
               </div>
             )}

@@ -9,6 +9,7 @@ import { useBeatNFT } from '@/hooks/useBeatNFT.enhanced'
 import BuyBeatNFTModal from '@/components/BuyBeatNFTModal'
 import LicenseSelector from '@/components/LicenseSelector'
 import ProtectedRoute from '@/components/ProtectedRoute'
+import { BackToDashboard } from '@/components/BackToDashboard'
 import { toast } from 'react-toastify'
 
 export default function BeatUpload() {
@@ -27,6 +28,7 @@ export default function BeatUpload() {
   const [selectedLicense, setSelectedLicense] = useState('BASIC')
   const [submitting, setSubmitting] = useState(false)
   const [showBuyModal, setShowBuyModal] = useState(false)
+  const [coverPreview, setCoverPreview] = useState<string | null>(null)
 
   const { user, isAuthenticated } = useWeb3Auth()
   const { uploadBeatAudio, uploadCoverImage, uploading, progress, error, currentOperation } = useFileUpload()
@@ -42,7 +44,17 @@ export default function BeatUpload() {
   const { getRootProps: getCoverProps, getInputProps: getCoverInputProps } = useDropzone({
     accept: { 'image/*': ['.jpg', '.jpeg', '.png'] },
     maxFiles: 1,
-    onDrop: (files) => setCoverFile(files[0])
+    onDrop: (files) => {
+      const file = files[0]
+      setCoverFile(file)
+      
+      // Create preview
+      if (file) {
+        const reader = new FileReader()
+        reader.onload = (e) => setCoverPreview(e.target?.result as string)
+        reader.readAsDataURL(file)
+      }
+    }
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -89,9 +101,8 @@ export default function BeatUpload() {
       return
     }
 
-    // Check BeatNFT credits
-    const fileType = audioFile.name.split('.').pop()?.toLowerCase() || 'mp3'
-    const uploadCheck = canUpload(fileType)
+    // Check BeatNFT credits with file size
+    const uploadCheck = canUpload(audioFile)
     
     if (!uploadCheck.allowed) {
       toast.error(uploadCheck.reason || 'Insufficient credits')
@@ -163,11 +174,10 @@ export default function BeatUpload() {
       console.log('Beat uploaded:', beatData)
       
       // Use BeatNFT credits
-      const fileType = audioFile.name.split('.').pop()?.toLowerCase() || 'mp3'
-      const uploadCheck = canUpload(fileType)
+      const uploadCheck = canUpload(audioFile)
       if (uploadCheck.cost > 0) {
         await useCredits(uploadCheck.cost)
-        toast.success(`✅ Used ${uploadCheck.cost} BeatNFT credit${uploadCheck.cost > 1 ? 's' : ''}!`)
+        toast.success(`✅ Used ${uploadCheck.cost} BeatNFT credit${uploadCheck.cost > 1 ? 's' : ''} for ${uploadCheck.fileSize} file!`)
       }
       
       // Refresh beats list
@@ -218,9 +228,10 @@ export default function BeatUpload() {
           <h1 style={{ fontSize: '3rem', fontWeight: 'bold', marginBottom: '1rem' }}>
             🎵 Upload Your Beat
           </h1>
-          <p style={{ fontSize: '1.125rem', opacity: 0.9 }}>
+          <p style={{ fontSize: '1.125rem', opacity: 0.9, marginBottom: '1.5rem' }}>
             Share your music with the world and start earning from your creativity
           </p>
+          <BackToDashboard />
         </div>
       </div>
 
@@ -242,7 +253,7 @@ export default function BeatUpload() {
                   {balance.hasProNFT ? '♾️ Pro BeatNFT - Unlimited Uploads' : `🎫 ${balance.credits} BeatNFT Credits`}
                 </h3>
                 <p style={{ fontSize: '0.875rem', opacity: 0.8, margin: 0 }}>
-                  {balance.hasProNFT ? 'Upload any format, any size' : 'MP3: 1 credit • WAV: 2 credits • ZIP: 3-5 credits'}
+                  {balance.hasProNFT ? 'Upload any format, any size (up to 100MB)' : '0-10MB: 1 credit • 10-25MB: 2 credits • 25-50MB: 3 credits • 50-100MB: 5 credits'}
                 </p>
               </div>
               {!balance.hasProNFT && balance.credits < 3 && (
@@ -284,7 +295,12 @@ export default function BeatUpload() {
           >
             <input {...getAudioInputProps()} />
             {audioFile ? (
-              <p style={{ color: '#059669', margin: 0 }}>✓ {audioFile.name}</p>
+              <div>
+                <p style={{ color: '#059669', margin: '0 0 0.5rem 0', fontWeight: '500' }}>✓ {audioFile.name}</p>
+                <p style={{ color: '#6b7280', margin: 0, fontSize: '0.875rem' }}>
+                  {(audioFile.size / (1024 * 1024)).toFixed(1)} MB
+                </p>
+              </div>
             ) : (
               <p style={{ color: '#6b7280', margin: 0 }}>Drop audio file here or click to browse</p>
             )}
@@ -309,7 +325,21 @@ export default function BeatUpload() {
           >
             <input {...getCoverInputProps()} />
             {coverFile ? (
-              <p style={{ color: '#059669', margin: 0 }}>✓ {coverFile.name}</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                {coverPreview && (
+                  <img 
+                    src={coverPreview} 
+                    alt="Cover preview" 
+                    style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '0.375rem' }}
+                  />
+                )}
+                <div>
+                  <p style={{ color: '#059669', margin: '0 0 0.25rem 0', fontWeight: '500' }}>✓ {coverFile.name}</p>
+                  <p style={{ color: '#6b7280', margin: 0, fontSize: '0.875rem' }}>
+                    {(coverFile.size / 1024).toFixed(0)} KB
+                  </p>
+                </div>
+              </div>
             ) : (
               <p style={{ color: '#6b7280', margin: 0 }}>Drop cover image here or click to browse</p>
             )}
@@ -560,7 +590,7 @@ export default function BeatUpload() {
       <BuyBeatNFTModal 
         isOpen={showBuyModal}
         onClose={() => setShowBuyModal(false)}
-        requiredCredits={audioFile ? canUpload(audioFile.name.split('.').pop()?.toLowerCase() || 'mp3').cost : 1}
+        requiredCredits={audioFile ? canUpload(audioFile).cost : 1}
       />
       
       </div>
