@@ -224,7 +224,7 @@ export function SIWEProvider({ children }: { children: ReactNode }) {
         console.warn('Failed to restore authentication:', error);
       }
     }
-  }, [isConnected, address, chainId, user?.isVerified])
+  }, [isConnected, address, chainId])
 
   return (
     <SIWEContext.Provider value={{

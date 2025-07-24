@@ -118,8 +118,9 @@ export default function BeatCard({ beat }: BeatCardProps) {
   const handlePurchase = () => {
     if (!user) {
       error('Please sign in to purchase beats', { 
-        throttleKey: 'auth-required',
-        throttleMs: 10000
+        throttleKey: 'auth-required-purchase',
+        throttleMs: 30000, // 30 second throttle for auth errors
+        once: true
       })
       return
     }
@@ -136,8 +137,9 @@ export default function BeatCard({ beat }: BeatCardProps) {
   const handleLike = () => {
     if (!user) {
       error('Please sign in to like beats', { 
-        throttleKey: 'auth-required',
-        throttleMs: 10000
+        throttleKey: 'auth-required-like',
+        throttleMs: 30000,
+        once: true
       })
       return
     }

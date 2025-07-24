@@ -84,6 +84,15 @@ export function UnifiedAuthProvider({ children }: { children: ReactNode }) {
       return
     }
     
+    // Prevent loops by checking if user data actually changed
+    const currentUserKey = `${address}-${web3Profile?.role}-${firebaseProfile?.role}`
+    const lastUserKey = user ? `${user.address}-${user.role}-${user.role}` : null
+    
+    if (currentUserKey === lastUserKey && user) {
+      setLoading(false)
+      return // No change, skip rebuild
+    }
+    
     setLoading(true)
     
     try {
@@ -158,7 +167,7 @@ export function UnifiedAuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false)
     }
-  }, [address, isConnected, web3Profile, firebaseProfile, firebaseUser])
+  }, [address, isConnected, web3Profile?.role, firebaseProfile?.role, firebaseUser?.uid])
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -171,7 +180,7 @@ export function UnifiedAuthProvider({ children }: { children: ReactNode }) {
     if (profileLoading === false || profileLoading === undefined) {
       buildUnifiedUser()
     }
-  }, [profileLoading, address, isConnected, web3Profile, firebaseProfile, firebaseUser, buildUnifiedUser])
+  }, [profileLoading, buildUnifiedUser])
   
   // Listen for admin setup completion
   useEffect(() => {
