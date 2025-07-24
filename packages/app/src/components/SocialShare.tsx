@@ -46,33 +46,39 @@ export default function SocialShare({
   const shareLinks = [
     {
       name: 'Twitter',
-      icon: '🐦',
-      color: '#1da1f2',
+      icon: 'X',
+      color: '#000000',
       url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}&hashtags=${encodeURIComponent(hashtags.join(','))}`
     },
     {
       name: 'Facebook', 
-      icon: '📘',
-      color: '#4267b2',
+      icon: 'f',
+      color: '#1877f2',
       url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`
     },
     {
       name: 'LinkedIn',
-      icon: '💼', 
-      color: '#0077b5',
+      icon: 'in', 
+      color: '#0a66c2',
       url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(title)}&summary=${encodeURIComponent(description)}`
     },
     {
-      name: 'WhatsApp',
-      icon: '💬',
-      color: '#25d366', 
-      url: `https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`
+      name: 'Instagram',
+      icon: 'IG',
+      color: '#e4405f', 
+      url: `https://www.instagram.com/`
     },
     {
-      name: 'Telegram',
-      icon: '✈️',
-      color: '#0088cc',
-      url: `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`
+      name: 'SoundCloud',
+      icon: 'SC',
+      color: '#ff5500',
+      url: `https://soundcloud.com/`
+    },
+    {
+      name: 'YouTube',
+      icon: 'YT',
+      color: '#ff0000',
+      url: `https://youtube.com/`
     }
   ]
 
@@ -105,7 +111,7 @@ export default function SocialShare({
         onClick={copyToClipboard}
         className={`bg-gray-500 text-white border-none rounded cursor-pointer flex items-center gap-2 font-medium transition-all hover:opacity-90 hover:-translate-y-0.5 ${sizeClasses[size]}`}
       >
-        <span className={iconClasses[size]}>🔗</span>
+        <span className={iconClasses[size]}>Link</span>
         {showLabels && <span>Copy</span>}
       </button>
     </div>

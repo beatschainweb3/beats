@@ -191,7 +191,7 @@ export default function BeatCard({ beat }: BeatCardProps) {
               </button>
               <div style={{ flex: 1, height: '40px', cursor: 'pointer' }}>
                 <AudioWaveform
-                  audioUrl={beat.audioUrl || 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav'}
+                  audioUrl={beat.audioUrl}
                   currentTime={currentTime}
                   duration={duration}
                   previewDuration={!canPreviewFullBeat ? previewDuration : -1}
@@ -251,15 +251,18 @@ export default function BeatCard({ beat }: BeatCardProps) {
         </div>
         
         {/* Hidden Audio Element */}
-        <audio
-          ref={audioRef}
-          src={beat.audioUrl || 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav'}
-          preload="metadata"
-          onError={() => {
-            console.warn('Audio failed to load:', beat.audioUrl)
-            setIsLoading(false)
-          }}
-        />
+        {beat.audioUrl && (
+          <audio
+            ref={audioRef}
+            src={beat.audioUrl}
+            preload="metadata"
+            onError={() => {
+              console.warn('Audio failed to load:', beat.audioUrl)
+              setIsLoading(false)
+              toast.error('Audio preview not available')
+            }}
+          />
+        )}
       </div>
 
       {/* Purchase Modal */}

@@ -61,9 +61,21 @@ export function useFileUpload() {
         reader.readAsDataURL(file)
       })
       
-      // Store in localStorage with beat ID
+      // Store in localStorage with beat ID (with size check)
       const audioKey = `beat_audio_${beatId}`
-      localStorage.setItem(audioKey, base64)
+      try {
+        localStorage.setItem(audioKey, base64)
+      } catch (storageError) {
+        // Clear some old data and retry
+        const keys = Object.keys(localStorage).filter(key => key.startsWith('beat_audio_'))
+        keys.slice(0, 5).forEach(key => localStorage.removeItem(key))
+        
+        try {
+          localStorage.setItem(audioKey, base64)
+        } catch (retryError) {
+          throw new Error('File too large for storage. Please use a smaller file or upgrade to Pro NFT.')
+        }
+      }
       
       setProgress(100)
       setUploading(false)

@@ -66,19 +66,9 @@ export default function BeatUpload() {
       return
     }
     
-    if (!isAuthenticated) {
+    if (!isAuthenticated && user?.role !== 'admin' && user?.role !== 'super_admin') {
       toast.error('Please sign in with your wallet to upload beats')
-      // Try to sign in automatically
-      try {
-        await signIn()
-        // Wait a moment for authentication to complete
-        await new Promise(resolve => setTimeout(resolve, 500))
-        // If still not authenticated after signing, return
-        if (!isAuthenticated) return
-      } catch (error) {
-        console.error('Auto sign-in failed:', error)
-        return
-      }
+      return
     }
     
     if (!user) {
@@ -114,6 +104,12 @@ export default function BeatUpload() {
 
     try {
       const beatId = Date.now().toString()
+      
+      // Check file size before upload
+      const fileSizeMB = audioFile.size / (1024 * 1024)
+      if (fileSizeMB > 50) {
+        throw new Error(`File too large (${fileSizeMB.toFixed(1)}MB). Maximum size is 50MB.`)
+      }
       
       // Upload audio file
       const audioUrl = await uploadBeatAudio(audioFile, beatId)

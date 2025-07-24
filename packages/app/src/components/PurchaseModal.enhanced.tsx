@@ -71,7 +71,7 @@ export default function PurchaseModal({ isOpen, onClose, beat }: PurchaseModalPr
       if (paymentMethod === 'crypto') {
         const result = await purchaseWithCrypto(purchaseData)
         if (result?.success) {
-          toast.success(`🎵 Successfully purchased "${beat.title}" with ${licenseType} license!`)
+          toast.success(`🎵 Successfully purchased "${beat.title}" with ${licenseType} license!`, { toastId: `purchase-${beat.id}` })
           
           // Add notification
           addNotification(
