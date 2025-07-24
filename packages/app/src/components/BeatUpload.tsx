@@ -10,7 +10,7 @@ import BuyBeatNFTModal from '@/components/BuyBeatNFTModal'
 import LicenseSelector from '@/components/LicenseSelector'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import { BackToDashboard } from '@/components/BackToDashboard'
-import { useToast } from '@/hooks/useToast'
+import { useEnhancedToast } from '@/hooks/useToast.enhanced'
 
 export default function BeatUpload() {
   const [formData, setFormData] = useState({
@@ -34,7 +34,7 @@ export default function BeatUpload() {
   const { uploadBeatAudio, uploadCoverImage, uploading, progress, error, currentOperation } = useFileUpload()
   const { refreshBeats } = useWeb3Beats()
   const { balance, canUpload, useCredits, isConnected } = useBeatNFT()
-  const { success, error: showError } = useToast()
+  const { success, error: showError } = useEnhancedToast()
 
   const { getRootProps: getAudioProps, getInputProps: getAudioInputProps } = useDropzone({
     accept: { 'audio/*': ['.mp3', '.wav', '.m4a'] },

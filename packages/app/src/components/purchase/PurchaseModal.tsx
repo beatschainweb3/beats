@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Beat } from '@/types'
 import { useWeb3Auth } from '@/hooks/useWeb3Auth'
-import { useToast } from '@/hooks/useToast'
+import { useEnhancedToast } from '@/hooks/useToast.enhanced'
 import { useAccount } from 'wagmi'
 import { getEthExchangeRate, getCurrencySymbol } from '@/utils/currency'
 
@@ -40,7 +40,7 @@ export default function PurchaseModal({
   const [paymentMethod, setPaymentMethod] = useState('crypto')
   const [exchangeRate, setExchangeRate] = useState<number | null>(null)
   const [currency] = useState('ZAR')
-  const { success, error } = useToast()
+  const { success, error } = useEnhancedToast()
   
   // Fetch exchange rate on component mount
   useEffect(() => {

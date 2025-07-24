@@ -11,7 +11,7 @@ import { useUnifiedAuth } from '@/context/UnifiedAuthContext'
 import { useContentCreator } from '@/hooks/useContentCreator'
 import { useCreatorPreview } from '@/hooks/useCreatorPreview'
 import { normalizeImageSource } from '@/utils/imageOptimization'
-import { useToast } from '@/hooks/useToast'
+import { useEnhancedToast } from '@/hooks/useToast.enhanced'
 
 interface BeatCardProps {
   beat: Beat
@@ -28,7 +28,7 @@ export default function BeatCard({ beat }: BeatCardProps) {
   const { user } = useUnifiedAuth()
   const { isCreator } = useContentCreator()
   const { canPreviewFullBeat, previewReason, previewDuration } = useCreatorPreview()
-  const { success, error, info } = useToast()
+  const { success, error, info } = useEnhancedToast()
   const audioRef = useRef<HTMLAudioElement>(null)
   const progressRef = useRef<HTMLDivElement>(null)
   const previewLimitShown = useRef(false)
@@ -48,30 +48,42 @@ export default function BeatCard({ beat }: BeatCardProps) {
         previewLimitShown.current = true
         info(`Preview limited to ${previewDuration}s. ${previewReason}`, { 
           throttleKey: `preview-limit-${beat.id}`,
-          throttleMs: 30000 // 30 second throttle
+          throttleMs: 30000,
+          once: true
         })
       }
     }
     
     const updateDuration = () => setDuration(audio.duration)
-    const handleEnded = () => setIsPlaying(false)
+    const handleEnded = () => {
+      setIsPlaying(false)
+      previewLimitShown.current = false // Reset for next play
+    }
     const handleLoadStart = () => setIsLoading(true)
     const handleCanPlay = () => setIsLoading(false)
 
-    audio.addEventListener('timeupdate', updateTime)
+    // Use throttled event listeners to prevent excessive calls
+    let timeUpdateThrottle: NodeJS.Timeout
+    const throttledUpdateTime = () => {
+      clearTimeout(timeUpdateThrottle)
+      timeUpdateThrottle = setTimeout(updateTime, 100) // 100ms throttle
+    }
+
+    audio.addEventListener('timeupdate', throttledUpdateTime)
     audio.addEventListener('loadedmetadata', updateDuration)
     audio.addEventListener('ended', handleEnded)
     audio.addEventListener('loadstart', handleLoadStart)
     audio.addEventListener('canplay', handleCanPlay)
 
     return () => {
-      audio.removeEventListener('timeupdate', updateTime)
+      clearTimeout(timeUpdateThrottle)
+      audio.removeEventListener('timeupdate', throttledUpdateTime)
       audio.removeEventListener('loadedmetadata', updateDuration)
       audio.removeEventListener('ended', handleEnded)
       audio.removeEventListener('loadstart', handleLoadStart)
       audio.removeEventListener('canplay', handleCanPlay)
     }
-  }, [canPreviewFullBeat, previewDuration, previewReason])
+  }, [beat.id, canPreviewFullBeat, previewDuration, previewReason, info])
 
   const togglePlay = async () => {
     const audio = audioRef.current
