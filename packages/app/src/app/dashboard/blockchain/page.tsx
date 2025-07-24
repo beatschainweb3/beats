@@ -3,11 +3,15 @@
 import { useState } from 'react'
 import DashboardLayout from '@/components/DashboardLayout'
 import TransactionHistory from '@/components/TransactionHistory'
+import BuyBeatNFTModal from '@/components/BuyBeatNFTModal'
 import { useAccount } from 'wagmi'
+import { useBeatNFT } from '@/hooks/useBeatNFT.enhanced'
 
 export default function BlockchainDashboardPage() {
   const { address, chain } = useAccount()
+  const { balance, upgradeToProNFT, loading } = useBeatNFT()
   const [activeTab, setActiveTab] = useState('transactions')
+  const [showBuyModal, setShowBuyModal] = useState(false)
   
   return (
     <DashboardLayout>
@@ -84,16 +88,71 @@ export default function BlockchainDashboardPage() {
           
           {activeTab === 'credits' && (
             <div className="p-6">
-              <div className="text-center py-8">
-                <div className="text-4xl mb-4">🎫</div>
-                <h3 className="text-xl font-medium mb-2">BeatNFT Credits</h3>
-                <p className="text-gray-600 mb-6">
-                  View your BeatNFT credit balance and purchase history
-                </p>
-                <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-                  Purchase Credits
-                </button>
-              </div>
+              {balance.hasProNFT ? (
+                <div className="text-center py-8">
+                  <div className="text-4xl mb-4">⭐</div>
+                  <h3 className="text-xl font-medium mb-2">Pro BeatNFT Holder</h3>
+                  <p className="text-gray-600 mb-4">You have unlimited uploads!</p>
+                  <div className="bg-gradient-to-r from-purple-100 to-blue-100 p-4 rounded-lg">
+                    <p className="text-sm text-purple-800">✨ Unlimited storage • Priority support • Advanced analytics</p>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <div className="text-center mb-8">
+                    <div className="text-4xl mb-4">🎫</div>
+                    <h3 className="text-xl font-medium mb-2">{balance.credits} BeatNFT Credits</h3>
+                    <p className="text-gray-600 mb-6">
+                      Credits are used for uploading beats based on file size
+                    </p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <h4 className="font-medium mb-2">Credit Usage</h4>
+                      <div className="space-y-2 text-sm text-gray-600">
+                        <div className="flex justify-between">
+                          <span>0-10MB files:</span>
+                          <span>1 credit</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>10-25MB files:</span>
+                          <span>2 credits</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>25-50MB files:</span>
+                          <span>3 credits</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>50-100MB files:</span>
+                          <span>5 credits</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gradient-to-br from-purple-50 to-blue-50 p-4 rounded-lg border border-purple-200">
+                      <h4 className="font-medium mb-2">Upgrade to Pro NFT</h4>
+                      <p className="text-sm text-gray-600 mb-3">Get unlimited uploads for 0.1 ETH</p>
+                      <button 
+                        onClick={() => upgradeToProNFT()}
+                        disabled={loading}
+                        className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50"
+                      >
+                        {loading ? 'Processing...' : 'Upgrade to Pro NFT'}
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="text-center">
+                    <button 
+                      onClick={() => setShowBuyModal(true)}
+                      className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      Purchase More Credits
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
           
@@ -157,6 +216,12 @@ export default function BlockchainDashboardPage() {
             </a>
           </div>
         </div>
+        
+        <BuyBeatNFTModal 
+          isOpen={showBuyModal}
+          onClose={() => setShowBuyModal(false)}
+          requiredCredits={1}
+        />
       </div>
     </DashboardLayout>
   )

@@ -6,17 +6,37 @@ export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
 export default async function Image({ params }: { params: { id: string } }) {
-  // In production, fetch producer data from API
-  const producerName = 'Producer Name'
-  const totalBeats = '12'
-  const totalSales = '8'
+  let producerName = 'Producer Name'
+  let totalBeats = '12'
+  let totalSales = '8'
+  let profileImage: string | null = null
+  
+  try {
+    // Try to fetch real producer data
+    const { SanityAdapter } = await import('@/adapters/sanityAdapter')
+    const sanityAdapter = new SanityAdapter()
+    const producer = await sanityAdapter.getProducer(params.id)
+    
+    if (producer) {
+      producerName = producer.name || producer.stageName || 'Producer Name'
+      totalBeats = producer.totalBeats?.toString() || '0'
+      totalSales = producer.totalSales?.toString() || '0'
+      profileImage = producer.profileImage || null
+    }
+  } catch (error) {
+    console.warn('Failed to fetch producer data for OG image:', error)
+  }
   
   return new ImageResponse(
     (
       <div
         tw='flex items-center justify-center w-full h-full text-white relative'
         style={{
-          background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+          background: profileImage 
+            ? `linear-gradient(rgba(16,185,129,0.8), rgba(5,150,105,0.9)), url(${profileImage})` 
+            : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
         }}>
         
         <div tw='flex items-center justify-center z-10 max-w-4xl mx-auto px-8'>
