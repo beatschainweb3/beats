@@ -8,12 +8,18 @@ import CreatorLicenseCard from '@/components/CreatorLicenseCard'
 import CreatorAnalyticsDashboard from '@/components/CreatorAnalyticsDashboard'
 import CollaborationHub from '@/components/CollaborationHub'
 import DashboardLayout from '@/components/DashboardLayout'
+import TransactionHistory from '@/components/TransactionHistory'
+import { useBeatNFT } from '@/hooks/useBeatNFT.enhanced'
+import { useAccount } from 'wagmi'
 import { toast } from 'react-toastify'
 
 export default function CreatorDashboard() {
   const { creator, licenses, loading, isCreator, getCreatorStats } = useContentCreator()
   const { user } = useWeb3Auth()
+  const { balance } = useBeatNFT()
+  const { address } = useAccount()
   const [stats, setStats] = useState<any>(null)
+  const [showBlockchain, setShowBlockchain] = useState(false)
   
   // Allow admin access for testing
   const hasAccess = isCreator || (user?.role === 'admin' || user?.role === 'super_admin')
@@ -239,6 +245,43 @@ export default function CreatorDashboard() {
               >
                 Browse BeatNFTs™
               </LinkComponent>
+            </div>
+          )}
+        </div>
+
+        {/* Blockchain Section */}
+        <div className="bg-white rounded-lg p-6 shadow-sm mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-gray-900">⛓️ Blockchain Activity</h2>
+            <button 
+              onClick={() => setShowBlockchain(!showBlockchain)}
+              className="text-purple-600 hover:text-purple-700 text-sm font-medium"
+            >
+              {showBlockchain ? 'Hide' : 'Show'} Details
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <p className="text-sm text-gray-600">Wallet</p>
+              <p className="font-mono text-xs break-all">{address || 'Not connected'}</p>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <p className="text-sm text-gray-600">BeatNFT Credits</p>
+              <p className="text-lg font-bold">{balance.hasProNFT ? '∞' : balance.credits}</p>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <p className="text-sm text-gray-600">Status</p>
+              <p className="text-sm font-medium">{balance.hasProNFT ? '⭐ Pro NFT' : '🎫 Standard'}</p>
+            </div>
+          </div>
+          
+          {showBlockchain && (
+            <div className="border-t pt-4">
+              <h3 className="font-medium mb-3">Recent Transactions</h3>
+              <div className="max-h-64 overflow-y-auto">
+                <TransactionHistory />
+              </div>
             </div>
           )}
         </div>

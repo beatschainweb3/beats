@@ -16,6 +16,13 @@ export default function DashboardSidebar() {
     { icon: "🎫", label: "BeatNFT Store", path: "/beatnft-store" },
   ]
   
+  // Music lover links
+  const musicLinks = [
+    { icon: "🎧", label: "Music Dashboard", path: "/music-dashboard" },
+    { icon: "🔍", label: "Discover", path: "/browse" },
+    { icon: "❤️", label: "Favorites", path: "/music-dashboard#favorites" },
+  ]
+  
   // Role-specific links
   let roleLinks = []
   
@@ -34,7 +41,7 @@ export default function DashboardSidebar() {
       { icon: "📈", label: "Content Stats", path: "/creator-dashboard/stats" },
       { icon: "🤝", label: "Negotiations", path: "/creator-dashboard/negotiations" },
     ]
-  } else {
+  } else if (user.role === 'producer') {
     // Producer links
     roleLinks = [
       { icon: "🎵", label: "My Beats", path: "/dashboard/beats" },
@@ -43,6 +50,9 @@ export default function DashboardSidebar() {
       { icon: "🤝", label: "Negotiations", path: "/dashboard/negotiations" },
       { icon: "⛓️", label: "Blockchain", path: "/dashboard/blockchain" },
     ]
+  } else {
+    // Music lover/general user links
+    roleLinks = musicLinks
   }
 
   return (
@@ -53,7 +63,9 @@ export default function DashboardSidebar() {
             ? 'Admin Dashboard' 
             : isCreator 
               ? 'Creator Dashboard' 
-              : 'Producer Dashboard'}
+              : user.role === 'producer'
+                ? 'Producer Dashboard'
+                : 'Music Dashboard'}
         </h2>
       </div>
       
