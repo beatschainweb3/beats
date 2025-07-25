@@ -26,6 +26,12 @@ export function useFileUpload() {
       // Check if IPFS is configured
       const hasIPFSConfig = process.env.NEXT_PUBLIC_PINATA_JWT && process.env.NEXT_PUBLIC_IPFS_GATEWAY
       
+      // Debug logging
+      console.log('🔍 IPFS Config Check:')
+      console.log('JWT:', process.env.NEXT_PUBLIC_PINATA_JWT ? 'SET' : 'MISSING')
+      console.log('Gateway:', process.env.NEXT_PUBLIC_IPFS_GATEWAY ? 'SET' : 'MISSING')
+      console.log('IPFS Ready:', hasIPFSConfig ? 'YES' : 'NO')
+      
       if (hasIPFSConfig) {
         try {
           setCurrentOperation('Uploading to IPFS')
@@ -46,7 +52,9 @@ export function useFileUpload() {
           // Continue with fallback
         }
       } else {
-        console.warn('IPFS not configured, using localStorage fallback')
+        console.warn('⚠️ IPFS not configured - Environment variables missing:')
+        console.warn('Required: NEXT_PUBLIC_PINATA_JWT, NEXT_PUBLIC_IPFS_GATEWAY')
+        console.warn('Falling back to localStorage (4MB limit)')
       }
       
       // Fallback to base64 storage
@@ -79,7 +87,8 @@ export function useFileUpload() {
         try {
           localStorage.setItem(audioKey, base64)
         } catch (retryError) {
-          throw new Error('File too large for storage. Please use a smaller file or upgrade to Pro NFT.')
+          const sizeMB = (file.size / (1024 * 1024)).toFixed(1)
+          throw new Error(`File too large for localStorage (${sizeMB}MB). IPFS configuration required. Check environment variables: NEXT_PUBLIC_PINATA_JWT, NEXT_PUBLIC_IPFS_GATEWAY`)
         }
       }
       
