@@ -24,7 +24,7 @@ export function useFileUpload() {
     
     try {
       // Check if IPFS is configured
-      const hasIPFSConfig = process.env.PINATA_JWT && process.env.NEXT_PUBLIC_IPFS_GATEWAY
+      const hasIPFSConfig = process.env.NEXT_PUBLIC_PINATA_JWT && process.env.NEXT_PUBLIC_IPFS_GATEWAY
       
       if (hasIPFSConfig) {
         try {

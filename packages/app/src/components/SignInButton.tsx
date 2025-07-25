@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useEnhancedToast } from '@/hooks/useToast.enhanced'
 
 interface SignInButtonProps {
   signIn: () => Promise<void>
@@ -9,6 +10,7 @@ interface SignInButtonProps {
 export default function SignInButton({ signIn }: SignInButtonProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const { success, error: showError } = useEnhancedToast()
 
   const handleSignIn = async () => {
     setIsLoading(true)
@@ -16,6 +18,11 @@ export default function SignInButton({ signIn }: SignInButtonProps) {
     
     try {
       await signIn()
+      success('Successfully signed in!', { 
+        throttleKey: 'signin-success',
+        throttleMs: 10000,
+        once: true
+      })
       
       // If sign-in is successful, reload the page after a short delay
       setTimeout(() => {
@@ -23,7 +30,13 @@ export default function SignInButton({ signIn }: SignInButtonProps) {
       }, 1000)
     } catch (err: any) {
       console.error('Sign-in failed:', err)
-      setError(err?.message || 'Failed to sign in. Please try again.')
+      const errorMessage = err?.message || 'Failed to sign in. Please try again.'
+      setError(errorMessage)
+      showError(errorMessage, { 
+        throttleKey: 'signin-error',
+        throttleMs: 10000,
+        once: true
+      })
     } finally {
       setIsLoading(false)
     }

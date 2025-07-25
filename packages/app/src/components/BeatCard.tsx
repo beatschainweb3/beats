@@ -131,7 +131,10 @@ export default function BeatCard({ beat }: BeatCardProps) {
     const beatNftId = beat.beatNftId || beat.id // ✅ BeatNFT™ compatibility
     console.log(`Purchase completed: BeatNFT™ ${beatNftId} with ${licenseType} license`)
     setShowPurchaseModal(false)
-    toast.success('BeatNFT™ purchase successful!', { toastId: `purchase-complete-${beatId}` })
+    success('BeatNFT™ purchase successful!', { 
+      throttleKey: `purchase-complete-${beatId}`,
+      throttleMs: 5000
+    })
   }
 
   const handleLike = () => {
@@ -292,7 +295,10 @@ export default function BeatCard({ beat }: BeatCardProps) {
             onError={() => {
               console.warn('Audio failed to load:', beat.audioUrl)
               setIsLoading(false)
-              toast.error('Audio preview not available', { toastId: `audio-load-error-${beat.id}` })
+              error('Audio preview not available', { 
+                throttleKey: `audio-load-error-${beat.id}`,
+                throttleMs: 10000
+              })
             }}
           />
         )}
@@ -312,7 +318,10 @@ export default function BeatCard({ beat }: BeatCardProps) {
         isOpen={showNegotiationModal}
         onClose={() => setShowNegotiationModal(false)}
         onSuccess={() => {
-          toast.success('License negotiation submitted!', { toastId: `negotiation-${beat.id}` })
+          success('License negotiation submitted!', { 
+            throttleKey: `negotiation-${beat.id}`,
+            throttleMs: 5000
+          })
           setShowNegotiationModal(false)
         }}
       />
