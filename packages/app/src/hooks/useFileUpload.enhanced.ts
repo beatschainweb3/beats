@@ -37,7 +37,7 @@ export function useFileUpload() {
           setCurrentOperation('Uploading to IPFS')
           setProgress(10)
           
-          const ipfsResult = await uploadFile(file, `beats/${beatId}`)
+          const ipfsResult = await uploadFile(file, 'beats')
           if (ipfsResult) {
             // Store IPFS URL in localStorage as backup
             const audioKey = `beat_audio_${beatId}`
@@ -118,7 +118,7 @@ export function useFileUpload() {
         setCurrentOperation('Uploading to IPFS')
         setProgress(10)
         
-        const ipfsResult = await uploadFile(file, `beats/covers/${beatId}`)
+        const ipfsResult = await uploadFile(file, 'covers')
         if (ipfsResult) {
           // Store IPFS URL in localStorage as backup
           const imageKey = `beat_cover_${beatId}`
