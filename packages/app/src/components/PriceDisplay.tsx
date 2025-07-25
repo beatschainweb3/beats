@@ -1,6 +1,20 @@
 'use client'
 
-import { formatPrice, PriceDisplayProps } from '@/utils/currency'
+// import { formatPrice, PriceDisplayProps } from '@/utils/currency' // Temporarily disabled
+
+interface PriceDisplayProps {
+  ethPrice: number
+  showBoth?: boolean
+  primary?: 'ETH' | 'ZAR'
+  className?: string
+}
+
+const formatPrice = (ethPrice: number) => ({
+  formatted: {
+    eth: `${ethPrice} ETH`,
+    zar: `R${Math.round(ethPrice * 18000).toLocaleString()}`
+  }
+})
 
 export default function PriceDisplay({ 
   ethPrice, 

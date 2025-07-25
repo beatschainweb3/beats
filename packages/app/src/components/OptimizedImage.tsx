@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { urlForImage } from '@/lib/sanity';
+// import { urlForImage } from '@/lib/sanity' // Temporarily disabled
+
+const urlForImage = (source: any) => source?.url || source;
 
 type ImageSource = {
   type: 'sanity' | 'ipfs' | 'url';

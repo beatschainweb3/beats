@@ -1,4 +1,6 @@
-import { urlForImage } from '@/lib/sanity';
+// import { urlForImage } from '@/lib/sanity' // Temporarily disabled
+
+const urlForImage = (source: any) => source?.url || source;
 
 /**
  * Utility functions for image optimization
