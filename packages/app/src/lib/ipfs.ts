@@ -34,7 +34,7 @@ export class IPFSClient {
     }
     
     try {
-      const upload = await client.upload.file(file).group(folder || 'beats')
+      const upload = await client.upload.file(file)
       
       return {
         hash: upload.IpfsHash,
