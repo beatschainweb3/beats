@@ -11,6 +11,8 @@ import LicenseSelector from '@/components/LicenseSelector'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import { BackToDashboard } from '@/components/BackToDashboard'
 import { useEnhancedToast } from '@/hooks/useToast.enhanced'
+import { EnvironmentStatus } from '@/components/EnvironmentStatus'
+import { UploadDiagnostics } from '@/components/UploadDiagnostics'
 
 export default function BeatUpload() {
   const [formData, setFormData] = useState({
@@ -603,6 +605,9 @@ export default function BeatUpload() {
       />
       
       </div>
+      
+      <EnvironmentStatus />
+      <UploadDiagnostics />
     </div>
   )
 }
